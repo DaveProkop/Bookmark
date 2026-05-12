@@ -2,13 +2,20 @@ import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import { VitePWA } from 'vite-plugin-pwa'
 import { fileURLToPath, URL } from 'node:url'
+import { readFileSync } from 'node:fs'
+
+const { version } = JSON.parse(readFileSync('./package.json', 'utf-8'))
+const isProd = process.env.NODE_ENV === 'production'
 
 export default defineConfig({
-  base: process.env.NODE_ENV === 'production' ? '/Bookmark/' : '/',
+  base: isProd ? '/Bookmark/' : '/',
+  define: {
+    __APP_VERSION__: JSON.stringify(version),
+  },
   plugins: [
     vue(),
     VitePWA({
-      registerType: 'autoUpdate',
+      registerType: 'prompt',
       includeAssets: ['icons/icon-192.png', 'icons/icon-512.png'],
       manifest: {
         name: 'Bookmark – Čtenářský deník',
@@ -18,8 +25,8 @@ export default defineConfig({
         background_color: '#fffbeb',
         display: 'standalone',
         orientation: 'portrait',
-        start_url: process.env.NODE_ENV === 'production' ? '/Bookmark/' : '/',
-        scope: process.env.NODE_ENV === 'production' ? '/Bookmark/' : '/',
+        start_url: isProd ? '/Bookmark/' : '/',
+        scope: isProd ? '/Bookmark/' : '/',
         icons: [
           { src: 'icons/icon-192.png', sizes: '192x192', type: 'image/png' },
           { src: 'icons/icon-512.png', sizes: '512x512', type: 'image/png' },

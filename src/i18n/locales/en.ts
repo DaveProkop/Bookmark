@@ -102,6 +102,12 @@ export default {
     statusPaused: 'Paused',
     statusFinished: 'Finished',
   },
+  update: {
+    title: 'New version available',
+    hint: 'Update the app to get the latest changes.',
+    update: 'Update',
+    dismiss: 'Later',
+  },
   install: {
     title: 'Install app',
     hint: 'Add Bookmark to your home screen for quick access',

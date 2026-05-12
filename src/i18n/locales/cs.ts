@@ -102,6 +102,12 @@ export default {
     statusPaused: 'Pozastaveno',
     statusFinished: 'Přečteno',
   },
+  update: {
+    title: 'Dostupná nová verze',
+    hint: 'Aktualizuj aplikaci pro nejnovější změny.',
+    update: 'Aktualizovat',
+    dismiss: 'Později',
+  },
   install: {
     title: 'Nainstalovat aplikaci',
     hint: 'Přidej Bookmark na plochu pro rychlý přístup',

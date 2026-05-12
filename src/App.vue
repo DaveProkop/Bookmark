@@ -2,6 +2,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import { useRegisterSW } from 'virtual:pwa-register/vue'
 import { HomeIcon, BookOpenIcon, CameraIcon, PlusIcon } from '@heroicons/vue/24/outline'
 import { HomeIcon as HomeIconSolid, BookOpenIcon as BookOpenIconSolid, PlusIcon as PlusIconSolid } from '@heroicons/vue/24/solid'
 
@@ -33,7 +34,6 @@ onMounted(() => {
     installPrompt.value = e as BeforeInstallPromptEvent
     showInstallBanner.value = true
   })
-
   window.addEventListener('appinstalled', () => {
     showInstallBanner.value = false
     installPrompt.value = null
@@ -48,16 +48,40 @@ async function install() {
   installPrompt.value = null
 }
 
-function dismissInstall() {
-  showInstallBanner.value = false
+// PWA update notification
+const { needRefresh, updateServiceWorker } = useRegisterSW()
+const showUpdateBanner = computed(() => needRefresh.value)
+
+const hasBanner = computed(() => showInstallBanner.value || showUpdateBanner.value)
+
+function dismissUpdate() {
+  needRefresh.value = false
 }
 </script>
 
 <template>
   <div class="flex flex-col h-full">
-    <!-- PWA install banner -->
+    <!-- Update banner -->
     <div
-      v-if="showInstallBanner"
+      v-if="showUpdateBanner"
+      class="fixed top-0 inset-x-0 z-50 bg-green-700 text-white px-4 py-3 flex items-center gap-3 shadow-lg"
+    >
+      <span class="text-2xl">🔄</span>
+      <div class="flex-1 min-w-0">
+        <p class="font-semibold text-sm leading-tight">{{ t('update.title') }}</p>
+        <p class="text-xs text-green-200 leading-tight mt-0.5">{{ t('update.hint') }}</p>
+      </div>
+      <button @click="updateServiceWorker()" class="bg-white text-green-800 text-xs font-bold px-3 py-1.5 rounded-lg flex-shrink-0">
+        {{ t('update.update') }}
+      </button>
+      <button @click="dismissUpdate" class="text-green-300 text-xs flex-shrink-0">
+        {{ t('update.dismiss') }}
+      </button>
+    </div>
+
+    <!-- Install banner -->
+    <div
+      v-else-if="showInstallBanner"
       class="fixed top-0 inset-x-0 z-50 bg-brand-800 text-white px-4 py-3 flex items-center gap-3 shadow-lg"
     >
       <span class="text-2xl">📚</span>
@@ -68,12 +92,12 @@ function dismissInstall() {
       <button @click="install" class="bg-white text-brand-800 text-xs font-bold px-3 py-1.5 rounded-lg flex-shrink-0">
         {{ t('install.install') }}
       </button>
-      <button @click="dismissInstall" class="text-brand-300 text-xs flex-shrink-0">
+      <button @click="showInstallBanner = false" class="text-brand-300 text-xs flex-shrink-0">
         {{ t('install.dismiss') }}
       </button>
     </div>
 
-    <main class="flex-1 overflow-y-auto" :class="{ 'pb-20': showNav, 'pt-16': showInstallBanner }">
+    <main class="flex-1 overflow-y-auto" :class="{ 'pb-20': showNav, 'pt-16': hasBanner }">
       <router-view />
     </main>
 

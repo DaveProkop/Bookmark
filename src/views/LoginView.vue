@@ -7,6 +7,7 @@ import { setLocale, getLocale } from '@/i18n'
 
 const router = useRouter()
 const { t, locale } = useI18n()
+const appVersion = __APP_VERSION__
 const email = ref('')
 const password = ref('')
 const loading = ref(false)
@@ -106,5 +107,6 @@ function switchMode(m: 'login' | 'register' | 'forgot') {
         </div>
       </div>
     </div>
+    <p class="text-center text-xs text-gray-300 mt-6">v{{ appVersion }}</p>
   </div>
 </template>
