@@ -35,7 +35,8 @@ export default defineConfig({
         ]
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        globPatterns: ['**/*.{js,css,ico,png,svg,woff2}'], // html excluded → network-first on hard refresh
+        navigateFallback: null,
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/covers\.openlibrary\.org\/.*/i,

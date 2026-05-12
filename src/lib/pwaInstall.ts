@@ -10,7 +10,6 @@ export const isInstalled = ref(window.matchMedia('(display-mode: standalone)').m
 export const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent)
 export const updateAvailable = ref(false)
 
-// Register all listeners ASAP — before Vue mounts
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault()
   installPromptEvent.value = e as BeforeInstallPromptEvent
@@ -21,6 +20,18 @@ window.addEventListener('appinstalled', () => {
   isInstalled.value = true
 })
 
+// Only flag as "update" if there was already a controller — first install doesn't count
+const hadController = !!navigator.serviceWorker?.controller
+
 navigator.serviceWorker?.addEventListener('controllerchange', () => {
-  updateAvailable.value = true
+  if (hadController) updateAvailable.value = true
+})
+
+// Proactively check for a new SW on tab focus + after 60s
+navigator.serviceWorker?.ready.then((reg) => {
+  const check = () => reg.update().catch(() => {})
+  setTimeout(check, 60_000)
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') check()
+  })
 })
