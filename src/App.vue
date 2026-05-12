@@ -4,11 +4,10 @@ import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { HomeIcon, BookOpenIcon, CameraIcon, PlusIcon } from '@heroicons/vue/24/outline'
 import { HomeIcon as HomeIconSolid, BookOpenIcon as BookOpenIconSolid, PlusIcon as PlusIconSolid } from '@heroicons/vue/24/solid'
-import { setLocale, getLocale } from '@/i18n'
 
 const route = useRoute()
 const router = useRouter()
-const { t, locale } = useI18n()
+const { t } = useI18n()
 
 const showNav = computed(() => !route.meta.public && !route.meta.hideNav)
 
@@ -18,10 +17,6 @@ const navItems = computed(() => [
   { name: 'scan',      label: t('nav.scan'),       icon: CameraIcon, activeIcon: CameraIcon },
   { name: 'add',       label: t('nav.add'),        icon: PlusIcon, activeIcon: PlusIconSolid },
 ])
-
-function toggleLocale() {
-  setLocale(getLocale() === 'en' ? 'cs' : 'en')
-}
 
 // PWA install prompt
 interface BeforeInstallPromptEvent extends Event {
@@ -96,13 +91,6 @@ function dismissInstall() {
           :class="item.name === 'scan' ? 'w-7 h-7' : ''"
         />
         <span class="text-xs font-medium">{{ item.label }}</span>
-      </button>
-      <button
-        @click="toggleLocale"
-        class="flex-1 flex flex-col items-center justify-center py-2 gap-0.5 transition-colors text-gray-400 hover:text-brand-800"
-      >
-        <span class="text-lg leading-none">🌐</span>
-        <span class="text-xs font-medium uppercase">{{ locale === 'en' ? 'CS' : 'EN' }}</span>
       </button>
     </nav>
   </div>
