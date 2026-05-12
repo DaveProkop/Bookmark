@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { useRegisterSW } from 'virtual:pwa-register/vue'
 import { HomeIcon, BookOpenIcon, CameraIcon, PlusIcon } from '@heroicons/vue/24/outline'
 import { HomeIcon as HomeIconSolid, BookOpenIcon as BookOpenIconSolid, PlusIcon as PlusIconSolid } from '@heroicons/vue/24/solid'
 import { installPromptEvent, isInstalled, isIOS } from '@/lib/pwaInstall'
@@ -39,20 +38,26 @@ async function install() {
   else installDismissed.value = true
 }
 
-// PWA update notification
-const { needRefresh, updateServiceWorker } = useRegisterSW()
+// PWA update — detect when a new SW takes over (autoUpdate mode)
+const updateReady = ref(false)
 
-function dismissUpdate() { needRefresh.value = false }
+onMounted(() => {
+  navigator.serviceWorker?.addEventListener('controllerchange', () => {
+    updateReady.value = true
+  })
+})
+
+function reload() { window.location.reload() }
 
 const hasBanner = computed(() =>
-  needRefresh.value || showInstallBanner.value || showIOSBanner.value
+  updateReady.value || showInstallBanner.value || showIOSBanner.value
 )
 </script>
 
 <template>
   <div class="flex flex-col h-full">
     <!-- Update banner -->
-    <div v-if="needRefresh"
+    <div v-if="updateReady"
       class="fixed top-0 inset-x-0 z-50 bg-green-700 text-white px-4 py-3 flex items-center gap-3 shadow-lg"
     >
       <span class="text-2xl">🔄</span>
@@ -60,10 +65,10 @@ const hasBanner = computed(() =>
         <p class="font-semibold text-sm leading-tight">{{ t('update.title') }}</p>
         <p class="text-xs text-green-200 leading-tight mt-0.5">{{ t('update.hint') }}</p>
       </div>
-      <button @click="updateServiceWorker()" class="bg-white text-green-800 text-xs font-bold px-3 py-1.5 rounded-lg flex-shrink-0">
+      <button @click="reload()" class="bg-white text-green-800 text-xs font-bold px-3 py-1.5 rounded-lg flex-shrink-0">
         {{ t('update.update') }}
       </button>
-      <button @click="dismissUpdate" class="text-green-300 text-xs flex-shrink-0">
+      <button @click="updateReady = false" class="text-green-300 text-xs flex-shrink-0">
         {{ t('update.dismiss') }}
       </button>
     </div>
