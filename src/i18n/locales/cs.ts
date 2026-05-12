@@ -102,6 +102,12 @@ export default {
     statusPaused: 'Pozastaveno',
     statusFinished: 'Přečteno',
   },
+  install: {
+    title: 'Nainstalovat aplikaci',
+    hint: 'Přidej Bookmark na plochu pro rychlý přístup',
+    install: 'Nainstalovat',
+    dismiss: 'Teď ne',
+  },
   nav: {
     dashboard: 'Přehled',
     library: 'Knihovna',

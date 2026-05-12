@@ -102,6 +102,12 @@ export default {
     statusPaused: 'Paused',
     statusFinished: 'Finished',
   },
+  install: {
+    title: 'Install app',
+    hint: 'Add Bookmark to your home screen for quick access',
+    install: 'Install',
+    dismiss: 'Not now',
+  },
   nav: {
     dashboard: 'Overview',
     library: 'Library',
