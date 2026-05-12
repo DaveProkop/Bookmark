@@ -2,9 +2,10 @@
 import { ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import { useRegisterSW } from 'virtual:pwa-register/vue'
 import { HomeIcon, BookOpenIcon, CameraIcon, PlusIcon } from '@heroicons/vue/24/outline'
 import { HomeIcon as HomeIconSolid, BookOpenIcon as BookOpenIconSolid, PlusIcon as PlusIconSolid } from '@heroicons/vue/24/solid'
-import { installPromptEvent, isInstalled, isIOS, updateAvailable } from '@/lib/pwaInstall'
+import { installPromptEvent, isInstalled, isIOS } from '@/lib/pwaInstall'
 
 const route = useRoute()
 const router = useRouter()
@@ -18,6 +19,18 @@ const navItems = computed(() => [
   { name: 'scan',      label: t('nav.scan'),       icon: CameraIcon, activeIcon: CameraIcon },
   { name: 'add',       label: t('nav.add'),        icon: PlusIcon, activeIcon: PlusIconSolid },
 ])
+
+// PWA update detection — official vite-plugin-pwa composable
+const { needRefresh, updateServiceWorker } = useRegisterSW({
+  onRegisteredSW(_, reg) {
+    if (!reg) return
+    const check = () => reg.update().catch(() => {})
+    setTimeout(check, 60_000)
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') check()
+    })
+  },
+})
 
 // PWA install
 const installDismissed = ref(false)
@@ -38,17 +51,15 @@ async function install() {
   else installDismissed.value = true
 }
 
-function reload() { window.location.reload() }
-
 const hasBanner = computed(() =>
-  updateAvailable.value || showInstallBanner.value || showIOSBanner.value
+  needRefresh.value || showInstallBanner.value || showIOSBanner.value
 )
 </script>
 
 <template>
   <div class="flex flex-col h-full">
     <!-- Update banner -->
-    <div v-if="updateAvailable"
+    <div v-if="needRefresh"
       class="fixed top-0 inset-x-0 z-50 bg-green-700 text-white px-4 py-3 flex items-center gap-3 shadow-lg"
     >
       <span class="text-2xl">🔄</span>
@@ -56,10 +67,10 @@ const hasBanner = computed(() =>
         <p class="font-semibold text-sm leading-tight">{{ t('update.title') }}</p>
         <p class="text-xs text-green-200 leading-tight mt-0.5">{{ t('update.hint') }}</p>
       </div>
-      <button @click="reload()" class="bg-white text-green-800 text-xs font-bold px-3 py-1.5 rounded-lg flex-shrink-0">
+      <button @click="updateServiceWorker(true)" class="bg-white text-green-800 text-xs font-bold px-3 py-1.5 rounded-lg flex-shrink-0">
         {{ t('update.update') }}
       </button>
-      <button @click="updateAvailable = false" class="text-green-300 text-xs flex-shrink-0">
+      <button @click="needRefresh = false" class="text-green-300 text-xs flex-shrink-0">
         {{ t('update.dismiss') }}
       </button>
     </div>
