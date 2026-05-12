@@ -113,6 +113,9 @@ export default {
     hint: 'Add Bookmark to your home screen for quick access',
     install: 'Install',
     dismiss: 'Not now',
+    iosTitle: 'Add to Home Screen',
+    iosHint: 'Tap {share} then "Add to Home Screen"',
+    iosClose: 'Close',
   },
   nav: {
     dashboard: 'Overview',

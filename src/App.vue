@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useRegisterSW } from 'virtual:pwa-register/vue'
 import { HomeIcon, BookOpenIcon, CameraIcon, PlusIcon } from '@heroicons/vue/24/outline'
 import { HomeIcon as HomeIconSolid, BookOpenIcon as BookOpenIconSolid, PlusIcon as PlusIconSolid } from '@heroicons/vue/24/solid'
+import { installPromptEvent, isInstalled, isIOS } from '@/lib/pwaInstall'
 
 const route = useRoute()
 const router = useRouter()
@@ -19,51 +20,39 @@ const navItems = computed(() => [
   { name: 'add',       label: t('nav.add'),        icon: PlusIcon, activeIcon: PlusIconSolid },
 ])
 
-// PWA install prompt
-interface BeforeInstallPromptEvent extends Event {
-  prompt(): Promise<void>
-  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>
-}
+// PWA install
+const installDismissed = ref(false)
+const iosDismissed = ref(false)
 
-const installPrompt = ref<BeforeInstallPromptEvent | null>(null)
-const showInstallBanner = ref(false)
-
-onMounted(() => {
-  window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault()
-    installPrompt.value = e as BeforeInstallPromptEvent
-    showInstallBanner.value = true
-  })
-  window.addEventListener('appinstalled', () => {
-    showInstallBanner.value = false
-    installPrompt.value = null
-  })
-})
+const showInstallBanner = computed(() =>
+  !isInstalled.value && !installDismissed.value && !!installPromptEvent.value
+)
+const showIOSBanner = computed(() =>
+  !isInstalled.value && !iosDismissed.value && isIOS && !installPromptEvent.value
+)
 
 async function install() {
-  if (!installPrompt.value) return
-  await installPrompt.value.prompt()
-  const { outcome } = await installPrompt.value.userChoice
-  if (outcome === 'accepted') showInstallBanner.value = false
-  installPrompt.value = null
+  if (!installPromptEvent.value) return
+  await installPromptEvent.value.prompt()
+  const { outcome } = await installPromptEvent.value.userChoice
+  if (outcome === 'accepted') installPromptEvent.value = null
+  else installDismissed.value = true
 }
 
 // PWA update notification
 const { needRefresh, updateServiceWorker } = useRegisterSW()
-const showUpdateBanner = computed(() => needRefresh.value)
 
-const hasBanner = computed(() => showInstallBanner.value || showUpdateBanner.value)
+function dismissUpdate() { needRefresh.value = false }
 
-function dismissUpdate() {
-  needRefresh.value = false
-}
+const hasBanner = computed(() =>
+  needRefresh.value || showInstallBanner.value || showIOSBanner.value
+)
 </script>
 
 <template>
   <div class="flex flex-col h-full">
     <!-- Update banner -->
-    <div
-      v-if="showUpdateBanner"
+    <div v-if="needRefresh"
       class="fixed top-0 inset-x-0 z-50 bg-green-700 text-white px-4 py-3 flex items-center gap-3 shadow-lg"
     >
       <span class="text-2xl">🔄</span>
@@ -79,9 +68,8 @@ function dismissUpdate() {
       </button>
     </div>
 
-    <!-- Install banner -->
-    <div
-      v-else-if="showInstallBanner"
+    <!-- Android install banner -->
+    <div v-else-if="showInstallBanner"
       class="fixed top-0 inset-x-0 z-50 bg-brand-800 text-white px-4 py-3 flex items-center gap-3 shadow-lg"
     >
       <span class="text-2xl">📚</span>
@@ -92,8 +80,24 @@ function dismissUpdate() {
       <button @click="install" class="bg-white text-brand-800 text-xs font-bold px-3 py-1.5 rounded-lg flex-shrink-0">
         {{ t('install.install') }}
       </button>
-      <button @click="showInstallBanner = false" class="text-brand-300 text-xs flex-shrink-0">
+      <button @click="installDismissed = true" class="text-brand-300 text-xs flex-shrink-0">
         {{ t('install.dismiss') }}
+      </button>
+    </div>
+
+    <!-- iOS install banner -->
+    <div v-else-if="showIOSBanner"
+      class="fixed top-0 inset-x-0 z-50 bg-brand-800 text-white px-4 py-3 flex items-center gap-3 shadow-lg"
+    >
+      <span class="text-2xl">📚</span>
+      <div class="flex-1 min-w-0">
+        <p class="font-semibold text-sm leading-tight">{{ t('install.iosTitle') }}</p>
+        <p class="text-xs text-brand-200 leading-tight mt-0.5">
+          {{ t('install.iosHint', { share: '⎙' }) }}
+        </p>
+      </div>
+      <button @click="iosDismissed = true" class="text-brand-300 text-xs flex-shrink-0">
+        {{ t('install.iosClose') }}
       </button>
     </div>
 

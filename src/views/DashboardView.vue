@@ -6,7 +6,8 @@ import { supabase } from '@/lib/supabase'
 import { useBooksStore } from '@/stores/books'
 import { useSessionsStore } from '@/stores/sessions'
 import BookCard from '@/components/BookCard.vue'
-import { ArrowRightOnRectangleIcon } from '@heroicons/vue/24/outline'
+import { ArrowRightOnRectangleIcon, ArrowDownTrayIcon } from '@heroicons/vue/24/outline'
+import { installPromptEvent, isInstalled } from '@/lib/pwaInstall'
 
 const router = useRouter()
 const { t, locale } = useI18n()
@@ -56,9 +57,19 @@ async function logout() {
         <h1 class="text-2xl font-bold text-brand-900">{{ t('dashboard.greeting', { name: userName }) }}</h1>
         <p class="text-gray-500 text-sm">{{ todayLabel }}</p>
       </div>
-      <button @click="logout" class="p-2 text-gray-400 hover:text-gray-600">
-        <ArrowRightOnRectangleIcon class="w-6 h-6" />
-      </button>
+      <div class="flex items-center gap-1">
+        <button
+          v-if="!isInstalled && installPromptEvent"
+          @click="installPromptEvent?.prompt()"
+          class="p-2 text-brand-600 hover:text-brand-800"
+          :title="t('install.title')"
+        >
+          <ArrowDownTrayIcon class="w-6 h-6" />
+        </button>
+        <button @click="logout" class="p-2 text-gray-400 hover:text-gray-600">
+          <ArrowRightOnRectangleIcon class="w-6 h-6" />
+        </button>
+      </div>
     </header>
 
     <div v-if="booksStore.loading" class="flex justify-center py-12">

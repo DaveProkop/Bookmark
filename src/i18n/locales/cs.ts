@@ -113,6 +113,9 @@ export default {
     hint: 'Přidej Bookmark na plochu pro rychlý přístup',
     install: 'Nainstalovat',
     dismiss: 'Teď ne',
+    iosTitle: 'Přidat na plochu',
+    iosHint: 'Klepni na {share} a vyber „Přidat na plochu"',
+    iosClose: 'Zavřít',
   },
   nav: {
     dashboard: 'Přehled',
