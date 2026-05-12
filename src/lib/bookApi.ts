@@ -1,5 +1,23 @@
 import type { BookLookupResult } from '@/types'
 
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL
+const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
+
+async function lookupDatabazeknih(isbn: string): Promise<BookLookupResult | null> {
+  if (!SUPABASE_URL) return null
+  const res = await fetch(`${SUPABASE_URL}/functions/v1/book-lookup`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'apikey': SUPABASE_KEY,
+      'Authorization': `Bearer ${SUPABASE_KEY}`,
+    },
+    body: JSON.stringify({ isbn }),
+  })
+  if (!res.ok) return null
+  return await res.json()
+}
+
 async function lookupOpenLibrary(isbn: string): Promise<BookLookupResult | null> {
   const res = await fetch(
     `https://openlibrary.org/api/books?bibkeys=ISBN:${isbn}&format=json&jscmd=data`
@@ -52,7 +70,12 @@ export async function lookupBook(isbn: string): Promise<BookLookupResult | null>
   } catch {}
 
   try {
-    return await lookupGoogleBooks(isbn)
+    const result = await lookupGoogleBooks(isbn)
+    if (result) return result
+  } catch {}
+
+  try {
+    return await lookupDatabazeknih(isbn)
   } catch {}
 
   return null

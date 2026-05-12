@@ -4,7 +4,9 @@ import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useBooksStore } from '@/stores/books'
 import StarRating from '@/components/StarRating.vue'
-import { ChevronLeftIcon } from '@heroicons/vue/24/outline'
+import BarcodeScanner from '@/components/BarcodeScanner.vue'
+import { lookupBook } from '@/lib/bookApi'
+import { ChevronLeftIcon, CameraIcon } from '@heroicons/vue/24/outline'
 
 const route = useRoute()
 const router = useRouter()
@@ -23,10 +25,32 @@ const form = ref({
 })
 const saving = ref(false)
 const error = ref<string | null>(null)
+const showScanner = ref(false)
+const lookingUp = ref(false)
 
 onMounted(() => {
   if (route.query.isbn) form.value.isbn = String(route.query.isbn)
 })
+
+async function onIsbnScanned(isbn: string) {
+  showScanner.value = false
+  form.value.isbn = isbn
+
+  if (!form.value.title.trim()) {
+    lookingUp.value = true
+    try {
+      const result = await lookupBook(isbn)
+      if (result) {
+        if (result.title) form.value.title = result.title
+        if (result.author) form.value.author = result.author ?? ''
+        if (result.year) form.value.year = result.year
+        if (result.cover_url) form.value.cover_url = result.cover_url
+      }
+    } finally {
+      lookingUp.value = false
+    }
+  }
+}
 
 async function save() {
   if (!form.value.title.trim()) { error.value = t('addBook.titleRequired'); return }
@@ -40,7 +64,7 @@ async function save() {
     location: form.value.location.trim() || null,
     notes: form.value.notes.trim() || null,
     my_rating: form.value.my_rating,
-    cover_url: null,
+    cover_url: form.value.cover_url,
   })
   saving.value = false
   if (book) router.push({ name: 'book', params: { id: book.id } })
@@ -49,6 +73,25 @@ async function save() {
 </script>
 
 <template>
+  <!-- Scanner overlay -->
+  <div v-if="showScanner" class="fixed inset-0 z-50 bg-black flex flex-col">
+    <div class="absolute top-0 inset-x-0 z-10 flex items-center gap-3 p-4 bg-gradient-to-b from-black/60 to-transparent">
+      <button @click="showScanner = false" class="text-white p-1">
+        <ChevronLeftIcon class="w-6 h-6" />
+      </button>
+      <h1 class="text-white font-semibold">{{ t('scan.title') }}</h1>
+    </div>
+    <BarcodeScanner @detected="onIsbnScanned" class="flex-1" />
+  </div>
+
+  <!-- Lookup loading overlay -->
+  <div v-if="lookingUp" class="fixed inset-0 z-50 bg-black/50 flex items-center justify-center">
+    <div class="bg-white rounded-2xl p-6 text-center shadow-xl">
+      <div class="w-8 h-8 border-4 border-brand-500 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+      <p class="text-gray-700 text-sm">{{ t('scan.searching') }}</p>
+    </div>
+  </div>
+
   <div class="p-4">
     <header class="flex items-center gap-3 mb-6">
       <button @click="router.back()" class="p-1 text-gray-500"><ChevronLeftIcon class="w-6 h-6" /></button>
@@ -71,7 +114,16 @@ async function save() {
         </div>
         <div class="flex-1">
           <label class="text-sm font-medium text-gray-600 mb-1 block">{{ t('addBook.isbn') }}</label>
-          <input v-model="form.isbn" class="input" placeholder="978…" />
+          <div class="relative">
+            <input v-model="form.isbn" class="input pr-10" placeholder="978…" />
+            <button
+              type="button"
+              @click="showScanner = true"
+              class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-brand-700 transition-colors"
+            >
+              <CameraIcon class="w-5 h-5" />
+            </button>
+          </div>
         </div>
       </div>
       <div>
