@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { HomeIcon, BookOpenIcon, CameraIcon, PlusIcon } from '@heroicons/vue/24/outline'
 import { HomeIcon as HomeIconSolid, BookOpenIcon as BookOpenIconSolid, PlusIcon as PlusIconSolid } from '@heroicons/vue/24/solid'
-import { installPromptEvent, isInstalled, isIOS } from '@/lib/pwaInstall'
+import { installPromptEvent, isInstalled, isIOS, updateAvailable } from '@/lib/pwaInstall'
 
 const route = useRoute()
 const router = useRouter()
@@ -38,26 +38,17 @@ async function install() {
   else installDismissed.value = true
 }
 
-// PWA update — detect when a new SW takes over (autoUpdate mode)
-const updateReady = ref(false)
-
-onMounted(() => {
-  navigator.serviceWorker?.addEventListener('controllerchange', () => {
-    updateReady.value = true
-  })
-})
-
 function reload() { window.location.reload() }
 
 const hasBanner = computed(() =>
-  updateReady.value || showInstallBanner.value || showIOSBanner.value
+  updateAvailable.value || showInstallBanner.value || showIOSBanner.value
 )
 </script>
 
 <template>
   <div class="flex flex-col h-full">
     <!-- Update banner -->
-    <div v-if="updateReady"
+    <div v-if="updateAvailable"
       class="fixed top-0 inset-x-0 z-50 bg-green-700 text-white px-4 py-3 flex items-center gap-3 shadow-lg"
     >
       <span class="text-2xl">🔄</span>
@@ -68,7 +59,7 @@ const hasBanner = computed(() =>
       <button @click="reload()" class="bg-white text-green-800 text-xs font-bold px-3 py-1.5 rounded-lg flex-shrink-0">
         {{ t('update.update') }}
       </button>
-      <button @click="updateReady = false" class="text-green-300 text-xs flex-shrink-0">
+      <button @click="updateAvailable = false" class="text-green-300 text-xs flex-shrink-0">
         {{ t('update.dismiss') }}
       </button>
     </div>

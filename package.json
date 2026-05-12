@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "prebuild": "npm version patch --no-git-tag-version",
     "build": "vue-tsc && vite build",
     "preview": "vite preview"
   },
