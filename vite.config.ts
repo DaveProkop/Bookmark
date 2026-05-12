@@ -4,7 +4,10 @@ import { VitePWA } from 'vite-plugin-pwa'
 import { fileURLToPath, URL } from 'node:url'
 import { readFileSync } from 'node:fs'
 
-const { version } = JSON.parse(readFileSync('./package.json', 'utf-8'))
+const pkg = JSON.parse(readFileSync('./package.json', 'utf-8'))
+const [major, minor] = pkg.version.split('.')
+const patch = process.env.GITHUB_RUN_NUMBER ?? '0'
+const version = `${major}.${minor}.${patch}`
 const isProd = process.env.NODE_ENV === 'production'
 
 export default defineConfig({
