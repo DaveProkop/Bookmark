@@ -32,9 +32,9 @@ export default defineConfig({
         start_url: isProd ? '/Bookmark/' : '/',
         scope: isProd ? '/Bookmark/' : '/',
         icons: [
-          { src: 'icons/icon-192.png', sizes: '192x192', type: 'image/png' },
-          { src: 'icons/icon-512.png', sizes: '512x512', type: 'image/png' },
-          { src: 'icons/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' }
+          { src: `${isProd ? '/Bookmark/' : '/'}icons/icon-192.png`, sizes: '192x192', type: 'image/png' },
+          { src: `${isProd ? '/Bookmark/' : '/'}icons/icon-512.png`, sizes: '512x512', type: 'image/png' },
+          { src: `${isProd ? '/Bookmark/' : '/'}icons/icon-512.png`, sizes: '512x512', type: 'image/png', purpose: 'maskable' },
         ]
       },
       workbox: {
