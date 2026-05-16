@@ -1,4 +1,9 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+import sharp from 'sharp'
+import { writeFileSync } from 'fs'
+import { mkdirSync } from 'fs'
+
+// Purple gradient B icon
+const svg512 = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="0.8" y2="1">
       <stop offset="0%" stop-color="#b97df5"/>
@@ -32,4 +37,17 @@
     L 178 396
     Z
   "/>
-</svg>
+</svg>`
+
+mkdirSync('public/icons', { recursive: true })
+writeFileSync('public/icons/icon.svg', svg512)
+
+const buf = Buffer.from(svg512)
+
+await sharp(buf).resize(512, 512).png({ compressionLevel: 9 }).toFile('public/icons/icon-512.png')
+console.log('✓ icon-512.png')
+
+await sharp(buf).resize(192, 192).png({ compressionLevel: 9 }).toFile('public/icons/icon-192.png')
+console.log('✓ icon-192.png')
+
+console.log('Icons generated successfully!')
