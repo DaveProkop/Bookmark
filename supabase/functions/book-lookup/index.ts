@@ -36,8 +36,7 @@ async function lookupDatabazeknih(isbn: string) {
 
   if (!res.ok) return null
 
-  // If the ISBN search redirected to a book detail page we have an exact match.
-  // If it stayed on the search results page, the ISBN is not in the database.
+  // ISBN search redirects to detail page on exact match
   const finalUrl = res.url
   if (!finalUrl.includes('/prehled-knihy/') && !finalUrl.includes('/book/')) {
     return null
@@ -49,19 +48,28 @@ async function lookupDatabazeknih(isbn: string) {
   if (!title) return null
 
   const coverUrl = extractMeta(html, 'og:image') ?? null
-
-  // Author appears as:  author: 'Shain Rose',
-  const authorMatch = html.match(/\bauthor:\s*'([^']+)'/)
-  const author = authorMatch?.[1] ?? null
-
-  // Year appears as: <em class='year'>2024</em>
+  const author = html.match(/\bauthor:\s*'([^']+)'/)?.[1] ?? null
   const yearMatch = html.match(/<em class=['"]year['"]>(\d{4})<\/em>/)
   const year = yearMatch ? parseInt(yearMatch[1]) : null
-
-  // Short description from og:description
   const description = extractMeta(html, 'og:description') ?? null
 
-  return { isbn, title, author, year, cover_url: coverUrl, description, external_rating: null, external_rating_count: null }
+  // Page count: "Počet stran: 352" or JSON-LD numberOfPages
+  let totalPages: number | null = null
+  const pagesMatch = html.match(/Počet\s+stran[^0-9]*(\d{2,4})/)
+    ?? html.match(/numberOfPages["']?\s*[>:]\s*["']?(\d{2,4})/)
+  if (pagesMatch) {
+    const n = parseInt(pagesMatch[1])
+    if (n > 9 && n < 9000) totalPages = n
+  }
+  if (!totalPages) {
+    const ldMatch = html.match(/"numberOfPages"\s*:\s*(\d+)/)
+    if (ldMatch) {
+      const n = parseInt(ldMatch[1])
+      if (n > 9 && n < 9000) totalPages = n
+    }
+  }
+
+  return { isbn, title, author, year, total_pages: totalPages, cover_url: coverUrl, description, external_rating: null, external_rating_count: null }
 }
 
 function extractMeta(html: string, property: string): string | undefined {
