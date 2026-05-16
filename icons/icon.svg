@@ -1,4 +1,35 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="96" fill="#92400e"/>
-  <text x="256" y="340" font-size="300" text-anchor="middle" font-family="serif">📚</text>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0.8" y2="1">
+      <stop offset="0%" stop-color="#b97df5"/>
+      <stop offset="100%" stop-color="#4c1d95"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Rounded square background -->
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+
+  <!-- Letter B as path (fill-rule evenodd creates the counters) -->
+  <path fill="white" fill-rule="evenodd" d="
+    M 98 68
+    L 292 68
+    Q 392 68 392 162
+    Q 392 226 308 256
+    Q 400 282 400 356
+    Q 400 444 296 444
+    L 98 444
+    Z
+    M 178 126
+    L 282 126
+    Q 334 126 334 172
+    Q 334 218 282 218
+    L 178 218
+    Z
+    M 178 294
+    L 288 294
+    Q 342 294 342 348
+    Q 342 396 288 396
+    L 178 396
+    Z
+  "/>
 </svg>
