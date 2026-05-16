@@ -7,7 +7,7 @@ import { setLocale, getLocale } from '@/i18n'
 
 const router = useRouter()
 const { t, locale } = useI18n()
-const appVersion = __APP_VERSION__
+const appVersion = import.meta.env.VITE_APP_VERSION
 const email = ref('')
 const password = ref('')
 const loading = ref(false)

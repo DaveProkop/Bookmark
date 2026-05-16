@@ -5,13 +5,11 @@ import { fileURLToPath, URL } from 'node:url'
 import { readFileSync } from 'node:fs'
 
 const { version } = JSON.parse(readFileSync('./package.json', 'utf-8'))
+process.env.VITE_APP_VERSION = version
 const isProd = process.env.NODE_ENV === 'production'
 
 export default defineConfig({
   base: isProd ? '/Bookmark/' : '/',
-  define: {
-    __APP_VERSION__: JSON.stringify(version),
-  },
   plugins: [
     vue(),
     VitePWA({
