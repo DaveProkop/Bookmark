@@ -1,4 +1,6 @@
-import '@/lib/pwaInstall' // register beforeinstallprompt ASAP, before Vue mounts
+import '@/lib/pwaInstall'
+import { initDarkMode } from '@/lib/darkMode'
+initDarkMode() // apply before Vue mounts to avoid flash
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import router from '@/router'

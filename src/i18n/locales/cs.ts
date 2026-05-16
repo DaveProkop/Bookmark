@@ -179,6 +179,8 @@ export default {
     sourceGoogleBooks: 'Google Books',
     sourceDatabazeknih: 'Databáze knih (CZ)',
     sourceCbdb: 'ČBDB (CZ)',
+    darkMode: 'Tmavý motiv',
+    lightMode: 'Světlý motiv',
     dangerZone: 'Nebezpečná zóna',
     deleteHint: 'Smazání účtu je nevratné. Odstraní se všechna tvoje data včetně knih a historie čtení.',
     deleteAccount: 'Smazat účet',

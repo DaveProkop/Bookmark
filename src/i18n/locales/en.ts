@@ -179,6 +179,8 @@ export default {
     sourceGoogleBooks: 'Google Books',
     sourceDatabazeknih: 'Databáze knih (CZ)',
     sourceCbdb: 'ČBDB (CZ)',
+    darkMode: 'Dark mode',
+    lightMode: 'Light mode',
     dangerZone: 'Danger zone',
     deleteHint: 'Deleting your account is irreversible. All your data including books and reading history will be removed.',
     deleteAccount: 'Delete account',

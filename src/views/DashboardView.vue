@@ -95,19 +95,19 @@ async function logout() {
   <div class="p-4">
     <header class="flex items-center justify-between mb-6">
       <div>
-        <h1 class="text-2xl font-bold text-gray-900">{{ t('dashboard.greeting', { name: userName }) }}</h1>
-        <p class="text-gray-400 text-sm">{{ todayLabel }}</p>
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-zinc-100">{{ t('dashboard.greeting', { name: userName }) }}</h1>
+        <p class="text-gray-400 dark:text-zinc-500 text-sm">{{ todayLabel }}</p>
       </div>
       <div class="flex items-center gap-1">
         <button
           v-if="!isInstalled && installPromptEvent"
           @click="installPromptEvent?.prompt()"
-          class="p-2 text-brand-600 hover:text-brand-800"
+          class="p-2 text-brand-600 hover:text-brand-800 dark:text-brand-400 dark:hover:text-brand-300"
           :title="t('install.title')"
         >
           <ArrowDownTrayIcon class="w-6 h-6" />
         </button>
-        <button @click="logout" class="p-2 text-gray-400 hover:text-gray-600">
+        <button @click="logout" class="p-2 text-gray-400 hover:text-gray-600 dark:text-zinc-600 dark:hover:text-zinc-400">
           <ArrowRightOnRectangleIcon class="w-6 h-6" />
         </button>
       </div>
@@ -120,40 +120,40 @@ async function logout() {
     <template v-else>
       <!-- Tags -->
       <section v-if="tagsWithCount.length" class="mb-6">
-        <h2 class="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-3">{{ t('dashboard.tags') }}</h2>
+        <h2 class="text-sm font-semibold text-gray-400 dark:text-zinc-500 uppercase tracking-wide mb-3">{{ t('dashboard.tags') }}</h2>
         <div class="grid grid-cols-3 gap-2.5">
           <button
             v-for="{ tag, count } in tagsWithCount"
             :key="tag.id"
             @click="goToTag(tag.id)"
-            class="flex flex-col items-center justify-center gap-1 bg-white rounded-2xl p-3 shadow-sm border border-gray-100 active:border-brand-300 active:bg-brand-50 transition-colors min-h-[72px]"
+            class="flex flex-col items-center justify-center gap-1 bg-white dark:bg-zinc-900 rounded-2xl p-3 shadow-sm border border-gray-100 dark:border-zinc-800 active:border-brand-300 active:bg-brand-50 dark:active:bg-brand-900/20 dark:active:border-brand-700 transition-colors min-h-[72px]"
           >
-            <span class="text-2xl font-black text-brand-700 leading-none">{{ count }}</span>
-            <span class="text-xs text-gray-500 text-center leading-tight line-clamp-2">{{ tag.name }}</span>
+            <span class="text-2xl font-black text-brand-700 dark:text-brand-400 leading-none">{{ count }}</span>
+            <span class="text-xs text-gray-500 dark:text-zinc-400 text-center leading-tight line-clamp-2">{{ tag.name }}</span>
           </button>
         </div>
       </section>
 
       <!-- Statistics -->
       <section v-if="completionsStore.allCompletions.length" class="mb-6">
-        <h2 class="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-3">{{ t('stats.title') }}</h2>
+        <h2 class="text-sm font-semibold text-gray-400 dark:text-zinc-500 uppercase tracking-wide mb-3">{{ t('stats.title') }}</h2>
         <div class="grid grid-cols-2 gap-2.5">
-          <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
-            <p class="text-xs text-gray-400 font-medium mb-1">{{ t('stats.booksMonth') }}</p>
-            <p class="text-3xl font-black text-brand-700">{{ completionsThisMonth.length }}</p>
-            <p v-if="pagesThisMonth > 0" class="text-xs text-gray-400 mt-0.5">{{ t('stats.pages', { n: pagesThisMonth }) }}</p>
+          <div class="bg-white dark:bg-zinc-900 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-zinc-800">
+            <p class="text-xs text-gray-400 dark:text-zinc-500 font-medium mb-1">{{ t('stats.booksMonth') }}</p>
+            <p class="text-3xl font-black text-brand-700 dark:text-brand-400">{{ completionsThisMonth.length }}</p>
+            <p v-if="pagesThisMonth > 0" class="text-xs text-gray-400 dark:text-zinc-500 mt-0.5">{{ t('stats.pages', { n: pagesThisMonth }) }}</p>
           </div>
-          <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
-            <p class="text-xs text-gray-400 font-medium mb-1">{{ t('stats.booksYear') }}</p>
-            <p class="text-3xl font-black text-brand-700">{{ completionsThisYear.length }}</p>
-            <p v-if="pagesThisYear > 0" class="text-xs text-gray-400 mt-0.5">{{ t('stats.pages', { n: pagesThisYear }) }}</p>
+          <div class="bg-white dark:bg-zinc-900 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-zinc-800">
+            <p class="text-xs text-gray-400 dark:text-zinc-500 font-medium mb-1">{{ t('stats.booksYear') }}</p>
+            <p class="text-3xl font-black text-brand-700 dark:text-brand-400">{{ completionsThisYear.length }}</p>
+            <p v-if="pagesThisYear > 0" class="text-xs text-gray-400 dark:text-zinc-500 mt-0.5">{{ t('stats.pages', { n: pagesThisYear }) }}</p>
           </div>
         </div>
       </section>
 
       <!-- Currently reading -->
       <section v-if="activeBooks.length" class="mb-6">
-        <h2 class="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-3">{{ t('dashboard.currentlyReading') }}</h2>
+        <h2 class="text-sm font-semibold text-gray-400 dark:text-zinc-500 uppercase tracking-wide mb-3">{{ t('dashboard.currentlyReading') }}</h2>
         <div class="flex flex-col gap-3">
           <BookCard
             v-for="book in activeBooks"
@@ -166,7 +166,7 @@ async function logout() {
 
       <!-- Recently added -->
       <section v-if="recentBooks.length" class="mb-6">
-        <h2 class="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-3">{{ t('dashboard.recentlyAdded') }}</h2>
+        <h2 class="text-sm font-semibold text-gray-400 dark:text-zinc-500 uppercase tracking-wide mb-3">{{ t('dashboard.recentlyAdded') }}</h2>
         <div class="flex flex-col gap-3">
           <BookCard v-for="book in recentBooks" :key="book.id" :book="book" />
         </div>
@@ -174,8 +174,8 @@ async function logout() {
 
       <div v-if="!booksStore.books.length" class="text-center py-16">
         <p class="text-5xl mb-4">📖</p>
-        <p class="text-gray-500 font-medium mb-2">{{ t('dashboard.noBooks') }}</p>
-        <p class="text-gray-400 text-sm mb-6">{{ t('dashboard.noBooksHint') }}</p>
+        <p class="text-gray-500 dark:text-zinc-400 font-medium mb-2">{{ t('dashboard.noBooks') }}</p>
+        <p class="text-gray-400 dark:text-zinc-500 text-sm mb-6">{{ t('dashboard.noBooksHint') }}</p>
         <div class="flex gap-3 justify-center">
           <button @click="router.push({ name: 'scan' })" class="btn-primary">{{ t('dashboard.scan') }}</button>
           <button @click="router.push({ name: 'add' })" class="btn-secondary">{{ t('dashboard.addManually') }}</button>

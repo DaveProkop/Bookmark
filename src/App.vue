@@ -21,7 +21,6 @@ const navItems = computed(() => [
   { name: 'settings',  label: t('nav.settings'),  icon: Cog6ToothIcon, activeIcon: Cog6ToothIconSolid },
 ])
 
-// PWA update detection — official vite-plugin-pwa composable
 const { needRefresh, updateServiceWorker } = useRegisterSW({
   onRegisteredSW(_, reg) {
     if (!reg) return
@@ -33,7 +32,6 @@ const { needRefresh, updateServiceWorker } = useRegisterSW({
   },
 })
 
-// PWA install
 const installDismissed = ref(false)
 const iosDismissed = ref(false)
 
@@ -61,17 +59,17 @@ const hasBanner = computed(() =>
   <div class="flex flex-col h-full">
     <!-- Update banner -->
     <div v-if="needRefresh"
-      class="fixed top-0 inset-x-0 z-50 bg-green-700 text-white px-4 py-3 flex items-center gap-3 shadow-lg"
+      class="fixed top-0 inset-x-0 z-50 bg-brand-700 text-white px-4 py-3 flex items-center gap-3 shadow-lg"
     >
       <span class="text-2xl">🔄</span>
       <div class="flex-1 min-w-0">
         <p class="font-semibold text-sm leading-tight">{{ t('update.title') }}</p>
-        <p class="text-xs text-green-200 leading-tight mt-0.5">{{ t('update.hint') }}</p>
+        <p class="text-xs text-brand-200 leading-tight mt-0.5">{{ t('update.hint') }}</p>
       </div>
-      <button @click="updateServiceWorker(true)" class="bg-white text-green-800 text-xs font-bold px-3 py-1.5 rounded-lg flex-shrink-0">
+      <button @click="updateServiceWorker(true)" class="bg-white text-brand-700 text-xs font-bold px-3 py-1.5 rounded-lg flex-shrink-0">
         {{ t('update.update') }}
       </button>
-      <button @click="needRefresh = false" class="text-green-300 text-xs flex-shrink-0">
+      <button @click="needRefresh = false" class="text-brand-200 text-xs flex-shrink-0">
         {{ t('update.dismiss') }}
       </button>
     </div>
@@ -113,13 +111,18 @@ const hasBanner = computed(() =>
       <router-view />
     </main>
 
-    <nav v-if="showNav" class="fixed bottom-0 inset-x-0 bg-white border-t border-gray-200 flex safe-area-inset-bottom z-50">
+    <nav v-if="showNav"
+      class="fixed bottom-0 inset-x-0 bg-white border-t border-gray-200 flex safe-area-inset-bottom z-50
+             dark:bg-zinc-900 dark:border-zinc-800"
+    >
       <button
         v-for="item in navItems"
         :key="item.name"
         @click="router.push({ name: item.name })"
         class="flex-1 flex flex-col items-center justify-center py-2 gap-0.5 transition-colors"
-        :class="route.name === item.name ? 'text-brand-800' : 'text-gray-400'"
+        :class="route.name === item.name
+          ? 'text-brand-700 dark:text-brand-400'
+          : 'text-gray-400 dark:text-zinc-500'"
       >
         <component
           :is="route.name === item.name ? item.activeIcon : item.icon"

@@ -152,12 +152,12 @@ function formatDateShort(iso: string) {
       <!-- My info card -->
       <div class="card">
         <div class="flex items-center justify-between mb-3">
-          <h2 class="font-semibold text-gray-700">{{ t('bookDetail.myInfo') }}</h2>
+          <h2 class="font-semibold text-gray-700 dark:text-zinc-300">{{ t('bookDetail.myInfo') }}</h2>
           <button
             @click="editing ? saveEdit() : editing = true"
             :class="editing
               ? 'flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-brand-700 text-white text-sm font-semibold shadow-sm active:opacity-80'
-              : 'flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-brand-100 text-brand-700 text-sm font-semibold active:bg-brand-200'"
+              : 'flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-brand-100 text-brand-700 dark:bg-brand-900/30 dark:text-brand-400 text-sm font-semibold active:bg-brand-200'"
           >
             <CheckIcon v-if="editing" class="w-4 h-4" />
             <PencilIcon v-else class="w-4 h-4" />
@@ -166,27 +166,27 @@ function formatDateShort(iso: string) {
         </div>
         <div class="space-y-3">
           <div>
-            <label class="text-xs text-gray-400 uppercase tracking-wide">{{ t('bookDetail.rating') }}</label>
+            <label class="text-xs text-gray-400 dark:text-zinc-500 uppercase tracking-wide">{{ t('bookDetail.rating') }}</label>
             <div class="mt-1"><StarRating :model-value="book.my_rating" @update:model-value="updateRating" /></div>
           </div>
           <div>
-            <label class="text-xs text-gray-400 uppercase tracking-wide">{{ t('bookDetail.location') }}</label>
+            <label class="text-xs text-gray-400 dark:text-zinc-500 uppercase tracking-wide">{{ t('bookDetail.location') }}</label>
             <input v-if="editing" v-model="editLocation" class="input mt-1" :placeholder="t('bookDetail.locationPlaceholder')" />
-            <p v-else class="mt-1 text-gray-700">{{ book.location || '—' }}</p>
+            <p v-else class="mt-1 text-gray-700 dark:text-zinc-300">{{ book.location || '—' }}</p>
           </div>
           <div>
-            <label class="text-xs text-gray-400 uppercase tracking-wide">{{ t('bookDetail.totalPages') }}</label>
+            <label class="text-xs text-gray-400 dark:text-zinc-500 uppercase tracking-wide">{{ t('bookDetail.totalPages') }}</label>
             <input v-if="editing" v-model.number="editTotalPages" type="number" min="1" class="input mt-1" :placeholder="t('bookDetail.totalPagesPlaceholder')" />
-            <p v-else class="mt-1 text-gray-700">{{ book.total_pages ?? '—' }}</p>
+            <p v-else class="mt-1 text-gray-700 dark:text-zinc-300">{{ book.total_pages ?? '—' }}</p>
           </div>
           <div>
-            <label class="text-xs text-gray-400 uppercase tracking-wide">{{ t('bookDetail.notes') }}</label>
+            <label class="text-xs text-gray-400 dark:text-zinc-500 uppercase tracking-wide">{{ t('bookDetail.notes') }}</label>
             <textarea v-if="editing" v-model="editNotes" class="input mt-1 h-20 resize-none" :placeholder="t('bookDetail.notesPlaceholder')" />
-            <p v-else class="mt-1 text-gray-700 whitespace-pre-wrap">{{ book.notes || '—' }}</p>
+            <p v-else class="mt-1 text-gray-700 dark:text-zinc-300 whitespace-pre-wrap">{{ book.notes || '—' }}</p>
           </div>
           <!-- Tags -->
           <div>
-            <label class="text-xs text-gray-400 uppercase tracking-wide">{{ t('bookDetail.tags') }}</label>
+            <label class="text-xs text-gray-400 dark:text-zinc-500 uppercase tracking-wide">{{ t('bookDetail.tags') }}</label>
             <div class="mt-2 flex flex-wrap gap-2">
               <template v-if="editing">
                 <button
@@ -197,7 +197,7 @@ function formatDateShort(iso: string) {
                   :class="['px-3 py-1 rounded-full text-sm transition-colors',
                     bookTagIds.includes(tag.id)
                       ? 'bg-brand-700 text-white'
-                      : 'bg-gray-100 text-gray-500 hover:bg-gray-200']"
+                      : 'bg-gray-100 text-gray-500 hover:bg-gray-200 dark:bg-zinc-700 dark:text-zinc-400 dark:hover:bg-zinc-600']"
                 >
                   {{ tag.name }}
                 </button>
@@ -206,11 +206,11 @@ function formatDateShort(iso: string) {
                 <span
                   v-for="tagId in bookTagIds"
                   :key="tagId"
-                  class="px-3 py-1 rounded-full text-sm bg-brand-100 text-brand-800"
+                  class="px-3 py-1 rounded-full text-sm bg-brand-100 text-brand-800 dark:bg-brand-900/30 dark:text-brand-300"
                 >
                   {{ tagsStore.getTagById(tagId)?.name }}
                 </span>
-                <span v-if="bookTagIds.length === 0" class="text-gray-400 text-sm">—</span>
+                <span v-if="bookTagIds.length === 0" class="text-gray-400 dark:text-zinc-500 text-sm">—</span>
               </template>
             </div>
           </div>
@@ -221,8 +221,8 @@ function formatDateShort(iso: string) {
       <div class="card">
         <div class="flex items-center justify-between mb-3">
           <div>
-            <h2 class="font-semibold text-gray-700">{{ t('bookDetail.finishHistory') }}</h2>
-            <p class="text-xs text-gray-400 mt-0.5">{{ t('bookDetail.markFinishedHint') }}</p>
+            <h2 class="font-semibold text-gray-700 dark:text-zinc-300">{{ t('bookDetail.finishHistory') }}</h2>
+            <p class="text-xs text-gray-400 dark:text-zinc-500 mt-0.5">{{ t('bookDetail.markFinishedHint') }}</p>
           </div>
           <button
             @click="markFinished"
@@ -237,7 +237,7 @@ function formatDateShort(iso: string) {
           <div
             v-for="(c, i) in bookCompletions"
             :key="c.id"
-            class="flex items-center gap-2 text-sm text-gray-600"
+            class="flex items-center gap-2 text-sm text-gray-600 dark:text-zinc-400"
           >
             <span class="text-brand-600 font-medium min-w-[1.25rem] text-center">{{ bookCompletions.length - i }}.</span>
             <span>{{ formatDateShort(c.finished_at) }}</span>
@@ -247,7 +247,7 @@ function formatDateShort(iso: string) {
 
       <!-- Log reading session -->
       <div class="card">
-        <h2 class="font-semibold text-gray-700 mb-3">{{ t('bookDetail.logReading') }}</h2>
+        <h2 class="font-semibold text-gray-700 dark:text-zinc-300 mb-3">{{ t('bookDetail.logReading') }}</h2>
         <div class="flex gap-2 mb-3">
           <input v-model.number="pageInput" type="number" :placeholder="t('bookDetail.pagePlaceholder')" class="input flex-1" min="1" />
         </div>
@@ -266,13 +266,13 @@ function formatDateShort(iso: string) {
 
       <!-- Reading history -->
       <div v-if="sessions.length" class="card">
-        <h2 class="font-semibold text-gray-700 mb-3">{{ t('bookDetail.readingHistory') }}</h2>
+        <h2 class="font-semibold text-gray-700 dark:text-zinc-300 mb-3">{{ t('bookDetail.readingHistory') }}</h2>
         <div class="space-y-3">
           <div v-for="s in sessions" :key="s.id" class="flex items-start gap-3">
             <span class="text-lg">{{ statusMeta[s.status].icon }}</span>
             <div class="flex-1 min-w-0">
               <p :class="['text-sm font-medium', statusMeta[s.status].color]">{{ statusMeta[s.status].label }}</p>
-              <p class="text-xs text-gray-400">
+              <p class="text-xs text-gray-400 dark:text-zinc-500">
                 {{ formatDate(s.timestamp) }}<span v-if="s.page_number"> · {{ t('bookDetail.page', { n: s.page_number }) }}</span>
               </p>
             </div>

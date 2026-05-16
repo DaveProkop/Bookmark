@@ -73,13 +73,13 @@ async function importFile(e: Event) {
 <template>
   <div class="p-4">
     <header class="flex items-center justify-between mb-4">
-      <h1 class="text-2xl font-bold text-brand-900">{{ t('library.title') }}</h1>
+      <h1 class="text-2xl font-bold text-brand-900 dark:text-brand-200">{{ t('library.title') }}</h1>
       <div class="flex gap-2">
-        <button @click="exportJson" title="Export JSON" class="p-2 text-gray-500 hover:text-brand-700">
+        <button @click="exportJson" title="Export JSON" class="p-2 text-gray-500 hover:text-brand-700 dark:text-zinc-400 dark:hover:text-brand-400">
           <ArrowDownTrayIcon class="w-5 h-5" />
         </button>
-        <button @click="exportCsv" title="Export CSV" class="p-2 text-gray-500 hover:text-brand-700 text-xs font-bold">CSV</button>
-        <button @click="fileInput?.click()" title="Import JSON" class="p-2 text-gray-500 hover:text-brand-700">
+        <button @click="exportCsv" title="Export CSV" class="p-2 text-gray-500 hover:text-brand-700 dark:text-zinc-400 dark:hover:text-brand-400 text-xs font-bold">CSV</button>
+        <button @click="fileInput?.click()" title="Import JSON" class="p-2 text-gray-500 hover:text-brand-700 dark:text-zinc-400 dark:hover:text-brand-400">
           <ArrowUpTrayIcon class="w-5 h-5" />
         </button>
         <input ref="fileInput" type="file" accept=".json" class="hidden" @change="importFile" />
@@ -95,7 +95,9 @@ async function importFile(e: Event) {
       <button
         @click="activeTagId = null"
         :class="['px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors',
-          activeTagId === null ? 'bg-brand-800 text-white' : 'bg-white text-gray-600 border border-gray-200']"
+          activeTagId === null
+            ? 'bg-brand-800 text-white dark:bg-brand-700'
+            : 'bg-white text-gray-600 border border-gray-200 dark:bg-zinc-800 dark:text-zinc-300 dark:border-zinc-700']"
       >
         {{ t('library.filterAll') }}
       </button>
@@ -104,7 +106,9 @@ async function importFile(e: Event) {
         :key="tag.id"
         @click="activeTagId = tag.id"
         :class="['px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors',
-          activeTagId === tag.id ? 'bg-brand-800 text-white' : 'bg-white text-gray-600 border border-gray-200']"
+          activeTagId === tag.id
+            ? 'bg-brand-800 text-white dark:bg-brand-700'
+            : 'bg-white text-gray-600 border border-gray-200 dark:bg-zinc-800 dark:text-zinc-300 dark:border-zinc-700']"
       >
         {{ tag.name }}
       </button>
@@ -114,7 +118,7 @@ async function importFile(e: Event) {
       <div class="w-8 h-8 border-4 border-brand-500 border-t-transparent rounded-full animate-spin" />
     </div>
 
-    <div v-else-if="!filtered.length" class="text-center py-12 text-gray-400">
+    <div v-else-if="!filtered.length" class="text-center py-12 text-gray-400 dark:text-zinc-500">
       <p class="text-4xl mb-3">🔍</p>
       <p>{{ t('library.nothingFound') }}</p>
     </div>

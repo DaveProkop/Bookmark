@@ -80,22 +80,22 @@ function reset() {
       </div>
     </div>
 
-    <div v-if="state === 'new' && lookupResult" class="flex-1 bg-brand-50 overflow-y-auto p-4 pt-16">
-      <h2 class="text-lg font-bold text-brand-900 mb-4">{{ t('scan.bookFound') }}</h2>
+    <div v-if="state === 'new' && lookupResult" class="flex-1 bg-brand-50 dark:bg-zinc-900 overflow-y-auto p-4 pt-16">
+      <h2 class="text-lg font-bold text-brand-900 dark:text-brand-200 mb-4">{{ t('scan.bookFound') }}</h2>
       <div class="card flex gap-4 mb-4">
         <img v-if="lookupResult.cover_url" :src="lookupResult.cover_url" class="w-20 h-28 object-cover rounded-lg" />
-        <div v-else class="w-20 h-28 bg-brand-100 rounded-lg flex items-center justify-center text-3xl">📚</div>
+        <div v-else class="w-20 h-28 bg-brand-100 dark:bg-brand-900/30 rounded-lg flex items-center justify-center text-3xl">📚</div>
         <div class="flex-1">
-          <p class="font-bold text-gray-900">{{ lookupResult.title }}</p>
-          <p class="text-gray-500 text-sm">{{ lookupResult.author }}</p>
-          <p class="text-gray-400 text-sm">{{ lookupResult.year }}</p>
-          <p v-if="lookupResult.external_rating" class="text-sm text-brand-600 mt-1">
+          <p class="font-bold text-gray-900 dark:text-zinc-100">{{ lookupResult.title }}</p>
+          <p class="text-gray-500 dark:text-zinc-400 text-sm">{{ lookupResult.author }}</p>
+          <p class="text-gray-400 dark:text-zinc-500 text-sm">{{ lookupResult.year }}</p>
+          <p v-if="lookupResult.external_rating" class="text-sm text-brand-600 dark:text-brand-400 mt-1">
             ⭐ {{ lookupResult.external_rating }}/5 ({{ lookupResult.external_rating_count }} {{ t('scan.ratings') }})
           </p>
         </div>
       </div>
-      <p v-if="lookupResult.description" class="text-gray-600 text-sm mb-4 line-clamp-4">{{ lookupResult.description }}</p>
-      <div v-if="saveError" class="text-red-700 text-sm bg-red-100 rounded-xl p-3 mb-3">{{ saveError }}</div>
+      <p v-if="lookupResult.description" class="text-gray-600 dark:text-zinc-400 text-sm mb-4 line-clamp-4">{{ lookupResult.description }}</p>
+      <div v-if="saveError" class="text-red-700 dark:text-red-400 text-sm bg-red-100 dark:bg-red-950/50 rounded-xl p-3 mb-3">{{ saveError }}</div>
       <div class="flex gap-3">
         <button @click="saveBook" :disabled="saving" class="btn-primary flex-1">
           {{ saving ? t('scan.saving') : t('scan.addToLibrary') }}
@@ -104,11 +104,11 @@ function reset() {
       </div>
     </div>
 
-    <div v-if="state === 'not-found'" class="flex-1 bg-brand-50 flex items-center justify-center p-6 pt-16">
+    <div v-if="state === 'not-found'" class="flex-1 bg-brand-50 dark:bg-zinc-900 flex items-center justify-center p-6 pt-16">
       <div class="text-center">
         <p class="text-5xl mb-4">🤷</p>
-        <p class="font-semibold text-gray-800 mb-2">{{ t('scan.notFound') }}</p>
-        <p class="text-gray-500 text-sm mb-6">ISBN: {{ lookupResult?.isbn }}</p>
+        <p class="font-semibold text-gray-800 dark:text-zinc-100 mb-2">{{ t('scan.notFound') }}</p>
+        <p class="text-gray-500 dark:text-zinc-400 text-sm mb-6">ISBN: {{ lookupResult?.isbn }}</p>
         <div class="flex gap-3 justify-center">
           <button @click="reset" class="btn-secondary">{{ t('scan.tryAgain') }}</button>
           <button @click="router.push({ name: 'add', query: { isbn: lookupResult?.isbn } })" class="btn-primary">

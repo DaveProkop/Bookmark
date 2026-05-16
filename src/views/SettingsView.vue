@@ -6,9 +6,10 @@ import { supabase } from '@/lib/supabase'
 import { useTagsStore } from '@/stores/tags'
 import {
   ArrowRightOnRectangleIcon, TrashIcon, ExclamationTriangleIcon,
-  PencilIcon, CheckIcon, XMarkIcon, PlusIcon,
+  PencilIcon, CheckIcon, XMarkIcon, PlusIcon, MoonIcon, SunIcon,
 } from '@heroicons/vue/24/outline'
 import { getBookLookupSource, setBookLookupSource, type BookLookupSource } from '@/lib/bookApi'
+import { isDark, toggleDarkMode } from '@/lib/darkMode'
 
 const router = useRouter()
 const { t } = useI18n()
@@ -101,12 +102,22 @@ async function deleteAccount() {
 
 <template>
   <div class="p-4 max-w-lg mx-auto">
-    <h1 class="text-2xl font-bold text-gray-900 mb-6">{{ t('settings.title') }}</h1>
+    <div class="flex items-center justify-between mb-6">
+      <h1 class="text-2xl font-bold text-gray-900 dark:text-zinc-100">{{ t('settings.title') }}</h1>
+      <button
+        @click="toggleDarkMode"
+        class="p-2 rounded-xl text-gray-500 hover:text-brand-700 dark:text-zinc-400 dark:hover:text-brand-400 bg-gray-100 dark:bg-zinc-800 transition-colors"
+        :title="isDark ? t('settings.lightMode') : t('settings.darkMode')"
+      >
+        <SunIcon v-if="isDark" class="w-5 h-5" />
+        <MoonIcon v-else class="w-5 h-5" />
+      </button>
+    </div>
 
     <!-- Account info -->
     <div class="card mb-4">
-      <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">{{ t('settings.account') }}</p>
-      <p class="text-xs text-gray-400 mb-1">{{ t('settings.nickname') }}</p>
+      <p class="text-xs font-semibold text-gray-400 dark:text-zinc-500 uppercase tracking-wide mb-3">{{ t('settings.account') }}</p>
+      <p class="text-xs text-gray-400 dark:text-zinc-500 mb-1">{{ t('settings.nickname') }}</p>
       <div class="flex gap-2 mb-4">
         <input
           v-model="nickname"
@@ -122,9 +133,9 @@ async function deleteAccount() {
           {{ nicknameSaved ? t('settings.nicknameSaved') : t('settings.nicknameSave') }}
         </button>
       </div>
-      <p class="text-xs text-gray-400 mb-1">Email</p>
-      <p class="text-sm text-gray-600 mb-4 break-all">{{ userEmail }}</p>
-      <button @click="signOut" class="flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-brand-700 transition-colors">
+      <p class="text-xs text-gray-400 dark:text-zinc-500 mb-1">Email</p>
+      <p class="text-sm text-gray-600 dark:text-zinc-400 mb-4 break-all">{{ userEmail }}</p>
+      <button @click="signOut" class="flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-brand-700 dark:text-zinc-400 dark:hover:text-brand-400 transition-colors">
         <ArrowRightOnRectangleIcon class="w-5 h-5" />
         {{ t('settings.signOut') }}
       </button>
@@ -132,7 +143,7 @@ async function deleteAccount() {
 
     <!-- Tags management -->
     <div class="card mb-4">
-      <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">{{ t('tags.title') }}</p>
+      <p class="text-xs font-semibold text-gray-400 dark:text-zinc-500 uppercase tracking-wide mb-3">{{ t('tags.title') }}</p>
 
       <!-- Add new tag -->
       <form @submit.prevent="addTag" class="flex gap-2 mb-3">
@@ -160,31 +171,31 @@ async function deleteAccount() {
               @keyup.escape="editingTagId = null"
               maxlength="40"
             />
-            <button @click="saveEditTag" class="p-1.5 text-brand-700 hover:text-brand-900">
+            <button @click="saveEditTag" class="p-1.5 text-brand-700 hover:text-brand-900 dark:text-brand-400 dark:hover:text-brand-300">
               <CheckIcon class="w-4 h-4" />
             </button>
-            <button @click="editingTagId = null" class="p-1.5 text-gray-400 hover:text-gray-600">
+            <button @click="editingTagId = null" class="p-1.5 text-gray-400 hover:text-gray-600 dark:text-zinc-500 dark:hover:text-zinc-300">
               <XMarkIcon class="w-4 h-4" />
             </button>
           </template>
           <template v-else>
-            <span class="flex-1 text-sm text-gray-700 px-3 py-1.5 bg-gray-50 rounded-lg">{{ tag.name }}</span>
-            <button @click="startEditTag(tag.id, tag.name)" class="p-1.5 text-gray-400 hover:text-brand-700">
+            <span class="flex-1 text-sm text-gray-700 dark:text-zinc-300 px-3 py-1.5 bg-gray-50 dark:bg-zinc-800 rounded-lg">{{ tag.name }}</span>
+            <button @click="startEditTag(tag.id, tag.name)" class="p-1.5 text-gray-400 hover:text-brand-700 dark:text-zinc-500 dark:hover:text-brand-400">
               <PencilIcon class="w-4 h-4" />
             </button>
-            <button @click="deleteTag(tag.id, tag.name)" class="p-1.5 text-gray-400 hover:text-red-600">
+            <button @click="deleteTag(tag.id, tag.name)" class="p-1.5 text-gray-400 hover:text-red-600 dark:text-zinc-500 dark:hover:text-red-500">
               <TrashIcon class="w-4 h-4" />
             </button>
           </template>
         </div>
       </div>
-      <p v-else class="text-sm text-gray-400">{{ t('tags.noTags') }}</p>
+      <p v-else class="text-sm text-gray-400 dark:text-zinc-500">{{ t('tags.noTags') }}</p>
     </div>
 
     <!-- Book lookup source -->
     <div class="card mb-4">
-      <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">{{ t('settings.bookLookup') }}</p>
-      <p class="text-sm text-gray-500 mb-3">{{ t('settings.bookLookupSource') }}</p>
+      <p class="text-xs font-semibold text-gray-400 dark:text-zinc-500 uppercase tracking-wide mb-1">{{ t('settings.bookLookup') }}</p>
+      <p class="text-sm text-gray-500 dark:text-zinc-400 mb-3">{{ t('settings.bookLookupSource') }}</p>
       <div class="flex flex-col gap-2">
         <label
           v-for="src in sources"
@@ -199,7 +210,7 @@ async function deleteAccount() {
             @change="onSourceChange(src.value)"
             class="w-4 h-4 accent-brand-600"
           />
-          <span class="text-sm text-gray-700">{{ t(src.labelKey) }}</span>
+          <span class="text-sm text-gray-700 dark:text-zinc-300">{{ t(src.labelKey) }}</span>
         </label>
       </div>
     </div>
@@ -207,7 +218,7 @@ async function deleteAccount() {
     <!-- Danger zone -->
     <div class="card border border-red-200">
       <p class="text-xs font-semibold text-red-500 uppercase tracking-wide mb-3">{{ t('settings.dangerZone') }}</p>
-      <p class="text-sm text-gray-500 mb-4">{{ t('settings.deleteHint') }}</p>
+      <p class="text-sm text-gray-500 dark:text-zinc-400 mb-4">{{ t('settings.deleteHint') }}</p>
       <button
         @click="showDeleteConfirm = true"
         class="flex items-center gap-2 text-sm font-medium text-red-600 hover:text-red-700 transition-colors"
@@ -221,14 +232,14 @@ async function deleteAccount() {
   <!-- Confirmation modal -->
   <Teleport to="body">
     <div v-if="showDeleteConfirm" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-      <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6">
+      <div class="bg-white dark:bg-zinc-900 rounded-2xl shadow-xl w-full max-w-sm p-6">
         <div class="flex items-center gap-3 mb-4">
-          <span class="flex-shrink-0 w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
-            <ExclamationTriangleIcon class="w-6 h-6 text-red-600" />
+          <span class="flex-shrink-0 w-10 h-10 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+            <ExclamationTriangleIcon class="w-6 h-6 text-red-600 dark:text-red-400" />
           </span>
-          <h2 class="text-lg font-semibold text-gray-900">{{ t('settings.deleteConfirmTitle') }}</h2>
+          <h2 class="text-lg font-semibold text-gray-900 dark:text-zinc-100">{{ t('settings.deleteConfirmTitle') }}</h2>
         </div>
-        <p class="text-sm text-gray-600 mb-6">{{ t('settings.deleteConfirmText') }}</p>
+        <p class="text-sm text-gray-600 dark:text-zinc-400 mb-6">{{ t('settings.deleteConfirmText') }}</p>
 
         <div v-if="deleteError" class="text-red-600 text-sm bg-red-50 rounded-lg p-3 mb-4">{{ deleteError }}</div>
 

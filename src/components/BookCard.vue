@@ -24,7 +24,7 @@ const statusLabel = computed(() => {
 </script>
 
 <template>
-  <div class="card flex gap-3 active:bg-gray-50 cursor-pointer" @click="router.push({ name: 'book', params: { id: book.id } })">
+  <div class="card flex gap-3 active:bg-gray-50 dark:active:bg-zinc-800 cursor-pointer" @click="router.push({ name: 'book', params: { id: book.id } })">
     <img
       v-if="book.cover_url"
       :src="book.cover_url"
@@ -37,21 +37,21 @@ const statusLabel = computed(() => {
 
     <div class="flex-1 min-w-0">
       <div class="flex items-start justify-between gap-2">
-        <h3 class="font-semibold text-gray-900 leading-tight line-clamp-2">{{ book.title }}</h3>
+        <h3 class="font-semibold text-gray-900 dark:text-zinc-100 leading-tight line-clamp-2">{{ book.title }}</h3>
         <span v-if="statusLabel" :class="['text-xs px-2 py-0.5 rounded-full font-medium flex-shrink-0', statusLabel.color]">
           {{ statusLabel.text }}
         </span>
       </div>
-      <p v-if="book.author" class="text-sm text-gray-500 mt-0.5">{{ book.author }}</p>
+      <p v-if="book.author" class="text-sm text-gray-500 dark:text-zinc-400 mt-0.5">{{ book.author }}</p>
       <div class="flex items-center gap-2 mt-1">
         <StarRating :model-value="book.my_rating" readonly />
-        <span v-if="book.location" class="text-xs text-gray-400">📍 {{ book.location }}</span>
+        <span v-if="book.location" class="text-xs text-gray-400 dark:text-zinc-500">📍 {{ book.location }}</span>
       </div>
       <div v-if="tags && tags.length" class="flex flex-wrap gap-1 mt-1.5">
         <span
           v-for="tag in tags"
           :key="tag.id"
-          class="text-xs px-2 py-0.5 rounded-full bg-brand-50 text-brand-700"
+          class="text-xs px-2 py-0.5 rounded-full bg-brand-50 text-brand-700 dark:bg-brand-900/30 dark:text-brand-300"
         >
           {{ tag.name }}
         </span>

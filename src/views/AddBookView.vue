@@ -96,46 +96,46 @@ async function save() {
 
   <!-- Lookup loading overlay -->
   <div v-if="lookingUp" class="fixed inset-0 z-50 bg-black/50 flex items-center justify-center">
-    <div class="bg-white rounded-2xl p-6 text-center shadow-xl">
+    <div class="bg-white dark:bg-zinc-900 rounded-2xl p-6 text-center shadow-xl">
       <div class="w-8 h-8 border-4 border-brand-500 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-      <p class="text-gray-700 text-sm">{{ t('scan.searching') }}</p>
+      <p class="text-gray-700 dark:text-zinc-300 text-sm">{{ t('scan.searching') }}</p>
     </div>
   </div>
 
   <div class="p-4">
     <header class="flex items-center gap-3 mb-6">
-      <button @click="router.back()" class="p-1 text-gray-500"><ChevronLeftIcon class="w-6 h-6" /></button>
-      <h1 class="text-2xl font-bold text-brand-900">{{ t('addBook.title') }}</h1>
+      <button @click="router.back()" class="p-1 text-gray-500 dark:text-zinc-400"><ChevronLeftIcon class="w-6 h-6" /></button>
+      <h1 class="text-2xl font-bold text-brand-900 dark:text-brand-200">{{ t('addBook.title') }}</h1>
     </header>
 
     <form @submit.prevent="save" class="space-y-4">
       <div>
-        <label class="text-sm font-medium text-gray-600 mb-1 block">{{ t('addBook.titleLabel') }}</label>
+        <label class="text-sm font-medium text-gray-600 dark:text-zinc-400 mb-1 block">{{ t('addBook.titleLabel') }}</label>
         <input v-model="form.title" class="input" :placeholder="t('addBook.titlePlaceholder')" required />
       </div>
       <div>
-        <label class="text-sm font-medium text-gray-600 mb-1 block">{{ t('addBook.author') }}</label>
+        <label class="text-sm font-medium text-gray-600 dark:text-zinc-400 mb-1 block">{{ t('addBook.author') }}</label>
         <input v-model="form.author" class="input" :placeholder="t('addBook.authorPlaceholder')" />
       </div>
       <div class="flex gap-3">
         <div class="flex-1">
-          <label class="text-sm font-medium text-gray-600 mb-1 block">{{ t('addBook.year') }}</label>
+          <label class="text-sm font-medium text-gray-600 dark:text-zinc-400 mb-1 block">{{ t('addBook.year') }}</label>
           <input v-model.number="form.year" type="number" class="input" placeholder="2024" min="1000" max="2099" />
         </div>
         <div class="flex-1">
-          <label class="text-sm font-medium text-gray-600 mb-1 block">{{ t('addBook.totalPages') }}</label>
+          <label class="text-sm font-medium text-gray-600 dark:text-zinc-400 mb-1 block">{{ t('addBook.totalPages') }}</label>
           <input v-model.number="form.total_pages" type="number" class="input" placeholder="352" min="1" />
         </div>
       </div>
       <div>
-        <label class="text-sm font-medium text-gray-600 mb-1 block">{{ t('addBook.isbn') }}</label>
+        <label class="text-sm font-medium text-gray-600 dark:text-zinc-400 mb-1 block">{{ t('addBook.isbn') }}</label>
         <div class="relative">
           <input v-model="form.isbn" class="input pr-16" placeholder="978…" />
           <button
             type="button"
             @click="onIsbnLookup"
             :disabled="!form.isbn.trim() || lookingUp"
-            class="absolute right-9 top-1/2 -translate-y-1/2 text-gray-400 hover:text-brand-700 disabled:opacity-30 transition-colors"
+            class="absolute right-9 top-1/2 -translate-y-1/2 text-gray-400 hover:text-brand-700 dark:text-zinc-500 dark:hover:text-brand-400 disabled:opacity-30 transition-colors"
             :title="t('addBook.lookupIsbn')"
           >
             <MagnifyingGlassIcon class="w-5 h-5" />
@@ -143,7 +143,7 @@ async function save() {
           <button
             type="button"
             @click="showScanner = true"
-            class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-brand-700 transition-colors"
+            class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-brand-700 dark:text-zinc-500 dark:hover:text-brand-400 transition-colors"
             :title="t('scan.title')"
           >
             <CameraIcon class="w-5 h-5" />
@@ -151,19 +151,19 @@ async function save() {
         </div>
       </div>
       <div>
-        <label class="text-sm font-medium text-gray-600 mb-1 block">{{ t('addBook.location') }}</label>
+        <label class="text-sm font-medium text-gray-600 dark:text-zinc-400 mb-1 block">{{ t('addBook.location') }}</label>
         <input v-model="form.location" class="input" :placeholder="t('addBook.locationPlaceholder')" />
       </div>
       <div>
-        <label class="text-sm font-medium text-gray-600 mb-1 block">{{ t('addBook.myRating') }}</label>
+        <label class="text-sm font-medium text-gray-600 dark:text-zinc-400 mb-1 block">{{ t('addBook.myRating') }}</label>
         <StarRating v-model="form.my_rating" class="mt-1" />
       </div>
       <div>
-        <label class="text-sm font-medium text-gray-600 mb-1 block">{{ t('addBook.notes') }}</label>
+        <label class="text-sm font-medium text-gray-600 dark:text-zinc-400 mb-1 block">{{ t('addBook.notes') }}</label>
         <textarea v-model="form.notes" class="input h-24 resize-none" :placeholder="t('addBook.notesPlaceholder')" />
       </div>
 
-      <div v-if="error" class="text-red-600 text-sm bg-red-50 rounded-lg p-3">{{ error }}</div>
+      <div v-if="error" class="text-red-600 dark:text-red-400 text-sm bg-red-50 dark:bg-red-950/50 rounded-lg p-3">{{ error }}</div>
 
       <button type="submit" :disabled="saving" class="btn-primary w-full">
         {{ saving ? t('addBook.saving') : t('addBook.save') }}
