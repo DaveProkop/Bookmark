@@ -69,7 +69,7 @@ const pagesThisMonth = computed(() =>
 
 onMounted(async () => {
   const { data: { user } } = await supabase.auth.getUser()
-  userName.value = user?.email?.split('@')[0] ?? ''
+  userName.value = user?.user_metadata?.display_name ?? user?.email?.split('@')[0] ?? ''
   await Promise.all([
     booksStore.fetchBooks(),
     tagsStore.fetchTags(),
@@ -95,8 +95,8 @@ async function logout() {
   <div class="p-4">
     <header class="flex items-center justify-between mb-6">
       <div>
-        <h1 class="text-2xl font-bold text-brand-900">{{ t('dashboard.greeting', { name: userName }) }}</h1>
-        <p class="text-gray-500 text-sm">{{ todayLabel }}</p>
+        <h1 class="text-2xl font-bold text-gray-900">{{ t('dashboard.greeting', { name: userName }) }}</h1>
+        <p class="text-gray-400 text-sm">{{ todayLabel }}</p>
       </div>
       <div class="flex items-center gap-1">
         <button
@@ -120,40 +120,40 @@ async function logout() {
     <template v-else>
       <!-- Tags -->
       <section v-if="tagsWithCount.length" class="mb-6">
-        <h2 class="text-lg font-semibold text-gray-700 mb-3">{{ t('dashboard.tags') }}</h2>
-        <div class="flex gap-2 overflow-x-auto pb-1">
+        <h2 class="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-3">{{ t('dashboard.tags') }}</h2>
+        <div class="grid grid-cols-3 gap-2.5">
           <button
             v-for="{ tag, count } in tagsWithCount"
             :key="tag.id"
             @click="goToTag(tag.id)"
-            class="flex-shrink-0 flex flex-col items-center px-4 py-3 bg-white rounded-2xl border border-gray-200 shadow-sm active:bg-brand-50 transition-colors min-w-[80px]"
+            class="flex flex-col items-center justify-center gap-1 bg-white rounded-2xl p-3 shadow-sm border border-gray-100 active:border-brand-300 active:bg-brand-50 transition-colors min-h-[72px]"
           >
-            <span class="text-2xl font-bold text-brand-800">{{ count }}</span>
-            <span class="text-xs text-gray-500 mt-0.5 text-center leading-tight">{{ tag.name }}</span>
+            <span class="text-2xl font-black text-brand-700 leading-none">{{ count }}</span>
+            <span class="text-xs text-gray-500 text-center leading-tight line-clamp-2">{{ tag.name }}</span>
           </button>
         </div>
       </section>
 
       <!-- Statistics -->
       <section v-if="completionsStore.allCompletions.length" class="mb-6">
-        <h2 class="text-lg font-semibold text-gray-700 mb-3">{{ t('stats.title') }}</h2>
-        <div class="grid grid-cols-2 gap-3">
-          <div class="bg-brand-50 rounded-2xl p-4">
-            <p class="text-xs text-brand-600 font-medium mb-1">{{ t('stats.booksMonth') }}</p>
-            <p class="text-3xl font-bold text-brand-800">{{ completionsThisMonth.length }}</p>
-            <p v-if="pagesThisMonth > 0" class="text-xs text-brand-500 mt-0.5">{{ t('stats.pages', { n: pagesThisMonth }) }}</p>
+        <h2 class="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-3">{{ t('stats.title') }}</h2>
+        <div class="grid grid-cols-2 gap-2.5">
+          <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+            <p class="text-xs text-gray-400 font-medium mb-1">{{ t('stats.booksMonth') }}</p>
+            <p class="text-3xl font-black text-brand-700">{{ completionsThisMonth.length }}</p>
+            <p v-if="pagesThisMonth > 0" class="text-xs text-gray-400 mt-0.5">{{ t('stats.pages', { n: pagesThisMonth }) }}</p>
           </div>
-          <div class="bg-brand-50 rounded-2xl p-4">
-            <p class="text-xs text-brand-600 font-medium mb-1">{{ t('stats.booksYear') }}</p>
-            <p class="text-3xl font-bold text-brand-800">{{ completionsThisYear.length }}</p>
-            <p v-if="pagesThisYear > 0" class="text-xs text-brand-500 mt-0.5">{{ t('stats.pages', { n: pagesThisYear }) }}</p>
+          <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+            <p class="text-xs text-gray-400 font-medium mb-1">{{ t('stats.booksYear') }}</p>
+            <p class="text-3xl font-black text-brand-700">{{ completionsThisYear.length }}</p>
+            <p v-if="pagesThisYear > 0" class="text-xs text-gray-400 mt-0.5">{{ t('stats.pages', { n: pagesThisYear }) }}</p>
           </div>
         </div>
       </section>
 
       <!-- Currently reading -->
       <section v-if="activeBooks.length" class="mb-6">
-        <h2 class="text-lg font-semibold text-gray-700 mb-3">{{ t('dashboard.currentlyReading') }}</h2>
+        <h2 class="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-3">{{ t('dashboard.currentlyReading') }}</h2>
         <div class="flex flex-col gap-3">
           <BookCard
             v-for="book in activeBooks"
@@ -166,7 +166,7 @@ async function logout() {
 
       <!-- Recently added -->
       <section v-if="recentBooks.length" class="mb-6">
-        <h2 class="text-lg font-semibold text-gray-700 mb-3">{{ t('dashboard.recentlyAdded') }}</h2>
+        <h2 class="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-3">{{ t('dashboard.recentlyAdded') }}</h2>
         <div class="flex flex-col gap-3">
           <BookCard v-for="book in recentBooks" :key="book.id" :book="book" />
         </div>

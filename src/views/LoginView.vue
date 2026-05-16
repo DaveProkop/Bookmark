@@ -85,12 +85,14 @@ function switchMode(m: 'login' | 'register' | 'forgot') {
 </script>
 
 <template>
-  <div class="min-h-screen flex flex-col items-center justify-center p-6 bg-brand-50">
+  <div class="min-h-screen flex flex-col items-center justify-center p-6 bg-gray-50">
     <div class="w-full max-w-sm">
       <div class="text-center mb-8">
-        <div class="text-6xl mb-3">📚</div>
-        <h1 class="text-3xl font-bold text-brand-900">Bookmark</h1>
-        <p class="text-gray-500 mt-1">{{ t('login.tagline') }}</p>
+        <div class="w-20 h-20 bg-brand-700 rounded-3xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+          <span class="text-4xl">📚</span>
+        </div>
+        <h1 class="text-3xl font-black text-gray-900">Bookmark</h1>
+        <p class="text-gray-400 mt-1">{{ t('login.tagline') }}</p>
       </div>
 
       <div class="card">

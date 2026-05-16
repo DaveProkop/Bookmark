@@ -153,9 +153,15 @@ function formatDateShort(iso: string) {
       <div class="card">
         <div class="flex items-center justify-between mb-3">
           <h2 class="font-semibold text-gray-700">{{ t('bookDetail.myInfo') }}</h2>
-          <button @click="editing ? saveEdit() : editing = true" class="p-1.5 text-brand-700">
-            <CheckIcon v-if="editing" class="w-5 h-5" />
-            <PencilIcon v-else class="w-5 h-5" />
+          <button
+            @click="editing ? saveEdit() : editing = true"
+            :class="editing
+              ? 'flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-brand-700 text-white text-sm font-semibold shadow-sm active:opacity-80'
+              : 'flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-brand-100 text-brand-700 text-sm font-semibold active:bg-brand-200'"
+          >
+            <CheckIcon v-if="editing" class="w-4 h-4" />
+            <PencilIcon v-else class="w-4 h-4" />
+            <span>{{ editing ? t('bookDetail.saveBtn') : t('bookDetail.editBtn') }}</span>
           </button>
         </div>
         <div class="space-y-3">

@@ -15,6 +15,8 @@ const { t } = useI18n()
 const tagsStore = useTagsStore()
 
 const userEmail = ref('')
+const nickname = ref('')
+const nicknameSaved = ref(false)
 const showDeleteConfirm = ref(false)
 const deleting = ref(false)
 const deleteError = ref<string | null>(null)
@@ -41,8 +43,17 @@ function onSourceChange(value: BookLookupSource) {
 onMounted(async () => {
   const { data: { user } } = await supabase.auth.getUser()
   userEmail.value = user?.email ?? ''
+  nickname.value = user?.user_metadata?.display_name ?? ''
   await tagsStore.fetchTags()
 })
+
+async function saveNickname() {
+  const { error } = await supabase.auth.updateUser({ data: { display_name: nickname.value.trim() } })
+  if (!error) {
+    nicknameSaved.value = true
+    setTimeout(() => { nicknameSaved.value = false }, 2500)
+  }
+}
 
 async function addTag() {
   const name = newTagName.value.trim()
@@ -95,8 +106,25 @@ async function deleteAccount() {
     <!-- Account info -->
     <div class="card mb-4">
       <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">{{ t('settings.account') }}</p>
-      <p class="text-sm text-gray-700 mb-4 break-all">{{ userEmail }}</p>
-      <button @click="signOut" class="flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-brand-700 transition-colors">
+      <p class="text-xs text-gray-400 mb-1">{{ t('settings.nickname') }}</p>
+      <div class="flex gap-2 mb-4">
+        <input
+          v-model="nickname"
+          class="input flex-1 text-sm"
+          :placeholder="t('settings.nicknamePlaceholder')"
+          maxlength="30"
+          @keyup.enter="saveNickname"
+        />
+        <button
+          @click="saveNickname"
+          class="btn-primary text-sm px-4 py-2.5 flex-shrink-0"
+        >
+          {{ nicknameSaved ? t('settings.nicknameSaved') : t('settings.nicknameSave') }}
+        </button>
+      </div>
+      <p class="text-xs text-gray-400 mb-1">Email</p>
+      <p class="text-sm text-gray-600 mb-4 break-all">{{ userEmail }}</p>
+      <button @click="signOut" class="flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-brand-700 transition-colors">
         <ArrowRightOnRectangleIcon class="w-5 h-5" />
         {{ t('settings.signOut') }}
       </button>
