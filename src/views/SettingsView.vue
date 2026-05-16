@@ -1,11 +1,9 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { supabase } from '@/lib/supabase'
-import { useBooksStore } from '@/stores/books'
 import { useTagsStore } from '@/stores/tags'
-import { useCompletionsStore } from '@/stores/completions'
 import {
   ArrowRightOnRectangleIcon, TrashIcon, ExclamationTriangleIcon,
   PencilIcon, CheckIcon, XMarkIcon, PlusIcon,
@@ -14,9 +12,7 @@ import { getBookLookupSource, setBookLookupSource, type BookLookupSource } from 
 
 const router = useRouter()
 const { t } = useI18n()
-const booksStore = useBooksStore()
 const tagsStore = useTagsStore()
-const completionsStore = useCompletionsStore()
 
 const userEmail = ref('')
 const showDeleteConfirm = ref(false)
@@ -37,29 +33,6 @@ const sources: { value: BookLookupSource; labelKey: string }[] = [
   { value: 'cbdb', labelKey: 'settings.sourceCbdb' },
 ]
 
-const now = new Date()
-const currentYear = now.getFullYear()
-const currentMonth = now.getMonth() + 1
-
-const completionsThisYear = computed(() => completionsStore.getCompletionsByYear(currentYear))
-const completionsThisMonth = computed(() => completionsStore.getCompletionsByMonth(currentYear, currentMonth))
-
-const pagesThisYear = computed(() =>
-  completionsThisYear.value.reduce((sum, c) => {
-    const book = booksStore.books.find(b => b.id === c.book_id)
-    return sum + (book?.total_pages ?? 0)
-  }, 0)
-)
-
-const pagesThisMonth = computed(() =>
-  completionsThisMonth.value.reduce((sum, c) => {
-    const book = booksStore.books.find(b => b.id === c.book_id)
-    return sum + (book?.total_pages ?? 0)
-  }, 0)
-)
-
-const hasStats = computed(() => completionsStore.allCompletions.length > 0)
-
 function onSourceChange(value: BookLookupSource) {
   lookupSource.value = value
   setBookLookupSource(value)
@@ -68,11 +41,7 @@ function onSourceChange(value: BookLookupSource) {
 onMounted(async () => {
   const { data: { user } } = await supabase.auth.getUser()
   userEmail.value = user?.email ?? ''
-  await Promise.all([
-    tagsStore.fetchTags(),
-    booksStore.fetchBooks(),
-    completionsStore.fetchAllCompletions(),
-  ])
+  await tagsStore.fetchTags()
 })
 
 async function addTag() {
@@ -131,24 +100,6 @@ async function deleteAccount() {
         <ArrowRightOnRectangleIcon class="w-5 h-5" />
         {{ t('settings.signOut') }}
       </button>
-    </div>
-
-    <!-- Statistics -->
-    <div class="card mb-4">
-      <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">{{ t('stats.title') }}</p>
-      <div v-if="hasStats" class="grid grid-cols-2 gap-3">
-        <div class="bg-brand-50 rounded-xl p-3">
-          <p class="text-xs text-brand-600 font-medium mb-1">{{ t('stats.booksMonth') }}</p>
-          <p class="text-2xl font-bold text-brand-800">{{ completionsThisMonth.length }}</p>
-          <p v-if="pagesThisMonth > 0" class="text-xs text-brand-500 mt-0.5">{{ t('stats.pages', { n: pagesThisMonth }) }}</p>
-        </div>
-        <div class="bg-brand-50 rounded-xl p-3">
-          <p class="text-xs text-brand-600 font-medium mb-1">{{ t('stats.booksYear') }}</p>
-          <p class="text-2xl font-bold text-brand-800">{{ completionsThisYear.length }}</p>
-          <p v-if="pagesThisYear > 0" class="text-xs text-brand-500 mt-0.5">{{ t('stats.pages', { n: pagesThisYear }) }}</p>
-        </div>
-      </div>
-      <p v-else class="text-sm text-gray-400">{{ t('stats.noData') }}</p>
     </div>
 
     <!-- Tags management -->

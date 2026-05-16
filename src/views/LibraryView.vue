@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useBooksStore } from '@/stores/books'
 import { useTagsStore } from '@/stores/tags'
@@ -7,6 +8,7 @@ import type { Tag } from '@/types'
 import BookCard from '@/components/BookCard.vue'
 import { MagnifyingGlassIcon, ArrowDownTrayIcon, ArrowUpTrayIcon } from '@heroicons/vue/24/outline'
 
+const route = useRoute()
 const { t } = useI18n()
 const booksStore = useBooksStore()
 const tagsStore = useTagsStore()
@@ -28,6 +30,7 @@ onMounted(async () => {
     tagsStore.fetchTags(),
   ])
   await tagsStore.fetchAllBookTags()
+  if (route.query.tag) activeTagId.value = String(route.query.tag)
 })
 
 function exportJson() {

@@ -38,6 +38,7 @@ export default {
     noBooksHint: 'Přidej svou první knihu skenováním nebo ručně',
     scan: 'Skenovat',
     addManually: 'Přidat ručně',
+    tags: 'Štítky',
   },
   library: {
     title: 'Knihovna',

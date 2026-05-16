@@ -38,6 +38,7 @@ export default {
     noBooksHint: 'Add your first book by scanning or manually',
     scan: 'Scan',
     addManually: 'Add manually',
+    tags: 'Tags',
   },
   library: {
     title: 'Library',
