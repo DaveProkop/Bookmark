@@ -15,6 +15,7 @@ const booksStore = useBooksStore()
 const state = ref<'scanning' | 'loading' | 'found' | 'new' | 'not-found'>('scanning')
 const lookupResult = ref<BookLookupResult | null>(null)
 const saving = ref(false)
+const saveError = ref<string | null>(null)
 
 async function onDetected(isbn: string) {
   state.value = 'loading'
@@ -30,7 +31,7 @@ async function onDetected(isbn: string) {
     lookupResult.value = result
     state.value = 'new'
   } else {
-    lookupResult.value = { isbn, title: '', author: null, year: null, cover_url: null, description: null, external_rating: null, external_rating_count: null }
+    lookupResult.value = { isbn, title: '', author: null, year: null, total_pages: null, cover_url: null, description: null, external_rating: null, external_rating_count: null }
     state.value = 'not-found'
   }
 }
@@ -38,19 +39,21 @@ async function onDetected(isbn: string) {
 async function saveBook() {
   if (!lookupResult.value) return
   saving.value = true
+  saveError.value = null
   const book = await booksStore.addBook({
     isbn: lookupResult.value.isbn,
     title: lookupResult.value.title,
     author: lookupResult.value.author,
     year: lookupResult.value.year,
+    total_pages: lookupResult.value.total_pages,
     cover_url: lookupResult.value.cover_url,
-    total_pages: null,
     location: null,
     my_rating: null,
     notes: null,
   })
   saving.value = false
   if (book) router.push({ name: 'book', params: { id: book.id } })
+  else saveError.value = booksStore.error ?? t('addBook.saveError')
 }
 
 function reset() {
@@ -92,6 +95,7 @@ function reset() {
         </div>
       </div>
       <p v-if="lookupResult.description" class="text-gray-600 text-sm mb-4 line-clamp-4">{{ lookupResult.description }}</p>
+      <div v-if="saveError" class="text-red-700 text-sm bg-red-100 rounded-xl p-3 mb-3">{{ saveError }}</div>
       <div class="flex gap-3">
         <button @click="saveBook" :disabled="saving" class="btn-primary flex-1">
           {{ saving ? t('scan.saving') : t('scan.addToLibrary') }}

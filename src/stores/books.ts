@@ -3,6 +3,11 @@ import { ref } from 'vue'
 import { supabase } from '@/lib/supabase'
 import type { Book, BookInsert, BookUpdate } from '@/types'
 
+async function getCurrentUserId(): Promise<string | null> {
+  const { data: { session } } = await supabase.auth.getSession()
+  return session?.user?.id ?? null
+}
+
 export const useBooksStore = defineStore('books', () => {
   const books = ref<Book[]>([])
   const loading = ref(false)
@@ -37,7 +42,9 @@ export const useBooksStore = defineStore('books', () => {
   }
 
   async function addBook(book: BookInsert): Promise<Book | null> {
-    const { data, error: err } = await supabase.from('books').insert(book).select().single()
+    const userId = await getCurrentUserId()
+    if (!userId) { error.value = 'Not authenticated'; return null }
+    const { data, error: err } = await supabase.from('books').insert({ ...book, user_id: userId }).select().single()
     if (err) { error.value = err.message; return null }
     if (data) books.value.unshift(data)
     return data
@@ -73,9 +80,11 @@ export const useBooksStore = defineStore('books', () => {
   async function importJson(json: string): Promise<{ added: number; skipped: number }> {
     const items: BookInsert[] = JSON.parse(json)
     let added = 0, skipped = 0
+    const userId = await getCurrentUserId()
+    if (!userId) return { added: 0, skipped: items.length }
     for (const item of items) {
       const { isbn, title, author, year, total_pages, cover_url, location, my_rating, notes } = item
-      const { error: err } = await supabase.from('books').insert({ isbn, title, author, year, total_pages, cover_url, location, my_rating, notes })
+      const { error: err } = await supabase.from('books').insert({ isbn, title, author, year, total_pages, cover_url, location, my_rating, notes, user_id: userId })
       if (err) skipped++
       else added++
     }

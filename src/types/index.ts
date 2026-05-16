@@ -46,6 +46,7 @@ export interface BookLookupResult {
   title: string
   author: string | null
   year: number | null
+  total_pages: number | null
   cover_url: string | null
   description: string | null
   external_rating: number | null

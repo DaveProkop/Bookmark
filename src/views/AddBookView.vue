@@ -41,6 +41,7 @@ async function fillFromLookup(isbn: string) {
       if (result.title) form.value.title = result.title
       if (result.author) form.value.author = result.author ?? ''
       if (result.year) form.value.year = result.year
+      if (result.total_pages) form.value.total_pages = result.total_pages
       if (result.cover_url) form.value.cover_url = result.cover_url
     }
   } finally {
