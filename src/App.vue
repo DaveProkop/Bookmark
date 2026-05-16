@@ -3,8 +3,8 @@ import { ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useRegisterSW } from 'virtual:pwa-register/vue'
-import { HomeIcon, BookOpenIcon, CameraIcon, PlusIcon } from '@heroicons/vue/24/outline'
-import { HomeIcon as HomeIconSolid, BookOpenIcon as BookOpenIconSolid, PlusIcon as PlusIconSolid } from '@heroicons/vue/24/solid'
+import { HomeIcon, BookOpenIcon, CameraIcon, PlusIcon, Cog6ToothIcon } from '@heroicons/vue/24/outline'
+import { HomeIcon as HomeIconSolid, BookOpenIcon as BookOpenIconSolid, PlusIcon as PlusIconSolid, Cog6ToothIcon as Cog6ToothIconSolid } from '@heroicons/vue/24/solid'
 import { installPromptEvent, isInstalled, isIOS } from '@/lib/pwaInstall'
 
 const route = useRoute()
@@ -18,6 +18,7 @@ const navItems = computed(() => [
   { name: 'library',   label: t('nav.library'),   icon: BookOpenIcon, activeIcon: BookOpenIconSolid },
   { name: 'scan',      label: t('nav.scan'),       icon: CameraIcon, activeIcon: CameraIcon },
   { name: 'add',       label: t('nav.add'),        icon: PlusIcon, activeIcon: PlusIconSolid },
+  { name: 'settings',  label: t('nav.settings'),  icon: Cog6ToothIcon, activeIcon: Cog6ToothIconSolid },
 ])
 
 // PWA update detection — official vite-plugin-pwa composable

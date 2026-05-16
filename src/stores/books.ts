@@ -74,8 +74,8 @@ export const useBooksStore = defineStore('books', () => {
     const items: BookInsert[] = JSON.parse(json)
     let added = 0, skipped = 0
     for (const item of items) {
-      const { isbn, title, author, year, cover_url, location, my_rating, notes } = item
-      const { error: err } = await supabase.from('books').insert({ isbn, title, author, year, cover_url, location, my_rating, notes })
+      const { isbn, title, author, year, total_pages, cover_url, location, my_rating, notes } = item
+      const { error: err } = await supabase.from('books').insert({ isbn, title, author, year, total_pages, cover_url, location, my_rating, notes })
       if (err) skipped++
       else added++
     }

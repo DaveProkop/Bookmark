@@ -44,6 +44,7 @@ async function saveBook() {
     author: lookupResult.value.author,
     year: lookupResult.value.year,
     cover_url: lookupResult.value.cover_url,
+    total_pages: null,
     location: null,
     my_rating: null,
     notes: null,

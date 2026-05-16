@@ -5,6 +5,7 @@ export interface Book {
   title: string
   author: string | null
   year: number | null
+  total_pages: number | null
   cover_url: string | null
   location: string | null
   my_rating: number | null
@@ -20,6 +21,20 @@ export interface ReadingSession {
   page_number: number | null
   timestamp: string
   notes: string | null
+}
+
+export interface Tag {
+  id: string
+  user_id: string
+  name: string
+  created_at: string
+}
+
+export interface BookCompletion {
+  id: string
+  book_id: string
+  user_id: string
+  finished_at: string
 }
 
 export type BookInsert = Omit<Book, 'id' | 'user_id' | 'created_at' | 'updated_at'>

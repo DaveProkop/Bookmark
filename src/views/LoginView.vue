@@ -14,6 +14,7 @@ const loading = ref(false)
 const error = ref<string | null>(null)
 const mode = ref<'login' | 'register' | 'forgot'>('login')
 const resetSent = ref(false)
+const registerSent = ref(false)
 
 async function submit() {
   loading.value = true
@@ -23,19 +24,50 @@ async function submit() {
     const { error: err } = await supabase.auth.resetPasswordForEmail(email.value, {
       redirectTo: `${window.location.origin}/reset-password`,
     })
-    if (err) error.value = err.message
+    if (err) error.value = translateAuthError(err.message)
     else resetSent.value = true
     loading.value = false
     return
   }
 
-  const { error: err } = mode.value === 'login'
-    ? await supabase.auth.signInWithPassword({ email: email.value, password: password.value })
-    : await supabase.auth.signUp({ email: email.value, password: password.value })
-
-  if (err) error.value = err.message
-  else router.push({ name: 'dashboard' })
+  if (mode.value === 'login') {
+    const { error: err } = await supabase.auth.signInWithPassword({ email: email.value, password: password.value })
+    if (err) error.value = translateAuthError(err.message)
+    else router.push({ name: 'dashboard' })
+  } else {
+    const { error: err } = await supabase.auth.signUp({
+      email: email.value,
+      password: password.value,
+      options: { emailRedirectTo: `${window.location.origin}/` },
+    })
+    if (err) {
+      error.value = translateAuthError(err.message)
+    } else {
+      email.value = ''
+      password.value = ''
+      registerSent.value = true
+    }
+  }
   loading.value = false
+}
+
+function translateAuthError(message: string): string {
+  const m = message.toLowerCase()
+  if (m.includes('invalid login credentials') || m.includes('invalid credentials'))
+    return t('login.errorInvalidCredentials')
+  if (m.includes('email not confirmed'))
+    return t('login.errorEmailNotConfirmed')
+  if (m.includes('user already registered') || m.includes('already been registered'))
+    return t('login.errorAlreadyRegistered')
+  if (m.includes('password should be at least'))
+    return t('login.errorPasswordTooShort')
+  if (m.includes('unable to validate email') || m.includes('invalid format'))
+    return t('login.errorInvalidEmail')
+  if (m.includes('rate limit') || m.includes('too many requests'))
+    return t('login.errorRateLimit')
+  if (m.includes('for security purposes'))
+    return t('login.errorRateLimit')
+  return message
 }
 
 function toggleLocale() {
@@ -46,6 +78,9 @@ function switchMode(m: 'login' | 'register' | 'forgot') {
   mode.value = m
   error.value = null
   resetSent.value = false
+  registerSent.value = false
+  email.value = ''
+  password.value = ''
 }
 </script>
 
@@ -77,10 +112,19 @@ function switchMode(m: 'login' | 'register' | 'forgot') {
           </button>
         </div>
 
+        <!-- Register sent confirmation -->
+        <div v-else-if="registerSent" class="text-center py-2">
+          <p class="text-2xl mb-3">✅</p>
+          <p class="text-gray-700 text-sm mb-4">{{ t('login.registerEmailSent') }}</p>
+          <button @click="switchMode('login')" class="text-brand-700 font-medium text-sm">
+            {{ t('login.backToLogin') }}
+          </button>
+        </div>
+
         <!-- Form -->
         <form v-else @submit.prevent="submit" class="flex flex-col gap-3">
           <input v-model="email" type="email" placeholder="Email" class="input" required autocomplete="email" />
-          <input v-if="mode !== 'forgot'" v-model="password" type="password" :placeholder="t('login.password')" class="input" required autocomplete="current-password" minlength="6" />
+          <input v-if="mode !== 'forgot'" v-model="password" type="password" :placeholder="t('login.password')" class="input" required :autocomplete="mode === 'register' ? 'new-password' : 'current-password'" minlength="6" />
 
           <div v-if="error" class="text-red-600 text-sm bg-red-50 rounded-lg p-3">{{ error }}</div>
 
@@ -89,7 +133,7 @@ function switchMode(m: 'login' | 'register' | 'forgot') {
           </button>
         </form>
 
-        <div v-if="!resetSent" class="mt-4 flex flex-col items-center gap-2 text-sm text-gray-500">
+        <div v-if="!resetSent && !registerSent" class="mt-4 flex flex-col items-center gap-2 text-sm text-gray-500">
           <p v-if="mode === 'login'">
             {{ t('login.noAccount') }}
             <button @click="switchMode('register')" class="text-brand-700 font-medium ml-1">{{ t('login.signUp') }}</button>

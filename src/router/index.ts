@@ -11,6 +11,7 @@ const router = createRouter({
     { path: '/book/:id', name: 'book', component: () => import('@/views/BookDetailView.vue') },
     { path: '/scan', name: 'scan', component: () => import('@/views/ScanView.vue'), meta: { hideNav: true } },
     { path: '/add', name: 'add', component: () => import('@/views/AddBookView.vue') },
+    { path: '/settings', name: 'settings', component: () => import('@/views/SettingsView.vue') },
   ]
 })
 

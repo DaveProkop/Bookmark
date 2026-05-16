@@ -3,9 +3,37 @@ import type { BookLookupResult } from '@/types'
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL
 const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
 
+export type BookLookupSource = 'auto' | 'openLibrary' | 'googleBooks' | 'databazeknih' | 'cbdb'
+const STORAGE_KEY = 'bookLookupSource'
+
+export function getBookLookupSource(): BookLookupSource {
+  const stored = localStorage.getItem(STORAGE_KEY)
+  const valid: BookLookupSource[] = ['auto', 'openLibrary', 'googleBooks', 'databazeknih', 'cbdb']
+  return valid.includes(stored as BookLookupSource) ? (stored as BookLookupSource) : 'auto'
+}
+
+export function setBookLookupSource(source: BookLookupSource): void {
+  localStorage.setItem(STORAGE_KEY, source)
+}
+
 async function lookupDatabazeknih(isbn: string): Promise<BookLookupResult | null> {
   if (!SUPABASE_URL) return null
   const res = await fetch(`${SUPABASE_URL}/functions/v1/book-lookup`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'apikey': SUPABASE_KEY,
+      'Authorization': `Bearer ${SUPABASE_KEY}`,
+    },
+    body: JSON.stringify({ isbn }),
+  })
+  if (!res.ok) return null
+  return await res.json()
+}
+
+async function lookupCbdb(isbn: string): Promise<BookLookupResult | null> {
+  if (!SUPABASE_URL) return null
+  const res = await fetch(`${SUPABASE_URL}/functions/v1/cbdb-lookup`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -64,19 +92,28 @@ async function lookupGoogleBooks(isbn: string): Promise<BookLookupResult | null>
 }
 
 export async function lookupBook(isbn: string): Promise<BookLookupResult | null> {
-  try {
-    const result = await lookupOpenLibrary(isbn)
-    if (result) return result
-  } catch {}
+  const source = getBookLookupSource()
 
-  try {
-    const result = await lookupGoogleBooks(isbn)
-    if (result) return result
-  } catch {}
+  const tryAll = async (fns: Array<() => Promise<BookLookupResult | null>>) => {
+    for (const fn of fns) {
+      try {
+        const result = await fn()
+        if (result) return result
+      } catch { /* try next */ }
+    }
+    return null
+  }
 
-  try {
-    return await lookupDatabazeknih(isbn)
-  } catch {}
+  if (source === 'openLibrary') return tryAll([() => lookupOpenLibrary(isbn)])
+  if (source === 'googleBooks') return tryAll([() => lookupGoogleBooks(isbn)])
+  if (source === 'databazeknih') return tryAll([() => lookupDatabazeknih(isbn)])
+  if (source === 'cbdb') return tryAll([() => lookupCbdb(isbn)])
 
-  return null
+  // auto: try all sources in order
+  return tryAll([
+    () => lookupOpenLibrary(isbn),
+    () => lookupGoogleBooks(isbn),
+    () => lookupDatabazeknih(isbn),
+    () => lookupCbdb(isbn),
+  ])
 }

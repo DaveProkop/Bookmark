@@ -2,10 +2,14 @@
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import type { Book, ReadingSession } from '@/types'
+import type { Book, ReadingSession, Tag } from '@/types'
 import StarRating from './StarRating.vue'
 
-const props = defineProps<{ book: Book; lastSession?: ReadingSession | null }>()
+const props = defineProps<{
+  book: Book
+  lastSession?: ReadingSession | null
+  tags?: Tag[]
+}>()
 const router = useRouter()
 const { t } = useI18n()
 
@@ -42,6 +46,15 @@ const statusLabel = computed(() => {
       <div class="flex items-center gap-2 mt-1">
         <StarRating :model-value="book.my_rating" readonly />
         <span v-if="book.location" class="text-xs text-gray-400">📍 {{ book.location }}</span>
+      </div>
+      <div v-if="tags && tags.length" class="flex flex-wrap gap-1 mt-1.5">
+        <span
+          v-for="tag in tags"
+          :key="tag.id"
+          class="text-xs px-2 py-0.5 rounded-full bg-brand-50 text-brand-700"
+        >
+          {{ tag.name }}
+        </span>
       </div>
     </div>
   </div>

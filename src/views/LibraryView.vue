@@ -2,37 +2,32 @@
 import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useBooksStore } from '@/stores/books'
-import { useSessionsStore } from '@/stores/sessions'
+import { useTagsStore } from '@/stores/tags'
+import type { Tag } from '@/types'
 import BookCard from '@/components/BookCard.vue'
 import { MagnifyingGlassIcon, ArrowDownTrayIcon, ArrowUpTrayIcon } from '@heroicons/vue/24/outline'
 
 const { t } = useI18n()
 const booksStore = useBooksStore()
-const sessionsStore = useSessionsStore()
+const tagsStore = useTagsStore()
 const search = ref('')
-const filter = ref<'all' | 'reading' | 'finished' | 'new'>('all')
+const activeTagId = ref<string | null>(null)
 const fileInput = ref<HTMLInputElement>()
 
 const filtered = computed(() => {
   let list = booksStore.searchBooks(search.value)
-  if (filter.value === 'reading') list = list.filter(b => ['STARTED', 'PAUSED'].includes(sessionsStore.getBookStatus(b.id) ?? ''))
-  if (filter.value === 'finished') list = list.filter(b => sessionsStore.getBookStatus(b.id) === 'FINISHED')
-  if (filter.value === 'new') list = list.filter(b => !sessionsStore.getBookStatus(b.id))
+  if (activeTagId.value) {
+    list = list.filter(b => tagsStore.getBookTagIds(b.id).includes(activeTagId.value!))
+  }
   return list
 })
 
-const filterLabels = computed(() => [
-  { key: 'all',      label: t('library.filterAll') },
-  { key: 'reading',  label: t('library.filterReading') },
-  { key: 'finished', label: t('library.filterFinished') },
-  { key: 'new',      label: t('library.filterNew') },
-] as const)
-
 onMounted(async () => {
-  await booksStore.fetchBooks()
-  for (const book of booksStore.books) {
-    await sessionsStore.fetchBookSessions(book.id)
-  }
+  await Promise.all([
+    booksStore.fetchBooks(),
+    tagsStore.fetchTags(),
+  ])
+  await tagsStore.fetchAllBookTags()
 })
 
 function exportJson() {
@@ -46,7 +41,7 @@ function exportJson() {
 function exportCsv() {
   const header = t('library.csvHeader')
   const rows = booksStore.books.map(b =>
-    [b.title, b.author, b.year, b.isbn, b.location, b.my_rating, b.notes]
+    [b.title, b.author, b.year, b.isbn, b.total_pages, b.location, b.my_rating, b.notes]
       .map(v => `"${String(v ?? '').replace(/"/g, '""')}"`)
       .join(';')
   )
@@ -55,6 +50,12 @@ function exportCsv() {
   a.href = URL.createObjectURL(blob)
   a.download = `bookmark-export-${new Date().toISOString().slice(0,10)}.csv`
   a.click()
+}
+
+function getBookTags(bookId: string): Tag[] {
+  return tagsStore.getBookTagIds(bookId)
+    .map(id => tagsStore.getTagById(id))
+    .filter((t): t is Tag => Boolean(t))
 }
 
 async function importFile(e: Event) {
@@ -89,13 +90,20 @@ async function importFile(e: Event) {
 
     <div class="flex gap-2 mb-4 overflow-x-auto pb-1">
       <button
-        v-for="f in filterLabels"
-        :key="f.key"
-        @click="filter = f.key"
+        @click="activeTagId = null"
         :class="['px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors',
-          filter === f.key ? 'bg-brand-800 text-white' : 'bg-white text-gray-600 border border-gray-200']"
+          activeTagId === null ? 'bg-brand-800 text-white' : 'bg-white text-gray-600 border border-gray-200']"
       >
-        {{ f.label }}
+        {{ t('library.filterAll') }}
+      </button>
+      <button
+        v-for="tag in tagsStore.tags"
+        :key="tag.id"
+        @click="activeTagId = tag.id"
+        :class="['px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors',
+          activeTagId === tag.id ? 'bg-brand-800 text-white' : 'bg-white text-gray-600 border border-gray-200']"
+      >
+        {{ tag.name }}
       </button>
     </div>
 
@@ -113,7 +121,7 @@ async function importFile(e: Event) {
         v-for="book in filtered"
         :key="book.id"
         :book="book"
-        :last-session="sessionsStore.getLatestSession(book.id)"
+        :tags="getBookTags(book.id)"
       />
     </div>
   </div>

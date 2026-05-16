@@ -4,27 +4,35 @@ import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useBooksStore } from '@/stores/books'
 import { useSessionsStore } from '@/stores/sessions'
+import { useTagsStore } from '@/stores/tags'
+import { useCompletionsStore } from '@/stores/completions'
 import StarRating from '@/components/StarRating.vue'
 import type { Book } from '@/types'
-import { ChevronLeftIcon, TrashIcon, PencilIcon, CheckIcon } from '@heroicons/vue/24/outline'
+import { ChevronLeftIcon, TrashIcon, PencilIcon, CheckIcon, BookOpenIcon } from '@heroicons/vue/24/outline'
 
 const route = useRoute()
 const router = useRouter()
 const { t, locale } = useI18n()
 const booksStore = useBooksStore()
 const sessionsStore = useSessionsStore()
+const tagsStore = useTagsStore()
+const completionsStore = useCompletionsStore()
 
 const book = ref<Book | null>(null)
 const editing = ref(false)
 const editNotes = ref('')
 const editLocation = ref('')
+const editTotalPages = ref<number | null>(null)
 const pageInput = ref<number | null>(null)
 const sessionNote = ref('')
 const loading = ref(false)
+const markingFinished = ref(false)
 
 const sessions = computed(() => sessionsStore.sessionsByBook[book.value?.id ?? ''] ?? [])
 const latestSession = computed(() => sessionsStore.getLatestSession(book.value?.id ?? ''))
 const currentStatus = computed(() => latestSession.value?.status ?? null)
+const bookTagIds = computed(() => tagsStore.getBookTagIds(book.value?.id ?? ''))
+const bookCompletions = computed(() => completionsStore.getBookCompletions(book.value?.id ?? ''))
 
 const statusMeta = computed(() => ({
   STARTED:  { label: t('bookDetail.statusStarted'),  icon: '📖', color: 'text-green-600' },
@@ -35,9 +43,15 @@ const statusMeta = computed(() => ({
 onMounted(async () => {
   book.value = await booksStore.getBookById(route.params.id as string)
   if (book.value) {
-    await sessionsStore.fetchBookSessions(book.value.id)
+    await Promise.all([
+      sessionsStore.fetchBookSessions(book.value.id),
+      tagsStore.fetchTags(),
+      tagsStore.fetchBookTags(book.value.id),
+      completionsStore.fetchBookCompletions(book.value.id),
+    ])
     editNotes.value = book.value.notes ?? ''
     editLocation.value = book.value.location ?? ''
+    editTotalPages.value = book.value.total_pages ?? null
   }
 })
 
@@ -49,10 +63,24 @@ async function updateRating(v: number | null) {
 
 async function saveEdit() {
   if (!book.value) return
-  await booksStore.updateBook(book.value.id, { notes: editNotes.value, location: editLocation.value })
+  await booksStore.updateBook(book.value.id, {
+    notes: editNotes.value,
+    location: editLocation.value,
+    total_pages: editTotalPages.value,
+  })
   book.value.notes = editNotes.value
   book.value.location = editLocation.value
+  book.value.total_pages = editTotalPages.value
   editing.value = false
+}
+
+async function toggleTag(tagId: string) {
+  if (!book.value) return
+  if (bookTagIds.value.includes(tagId)) {
+    await tagsStore.removeTagFromBook(book.value.id, tagId)
+  } else {
+    await tagsStore.addTagToBook(book.value.id, tagId)
+  }
 }
 
 async function logSession(status: 'STARTED' | 'PAUSED' | 'FINISHED') {
@@ -69,6 +97,13 @@ async function logSession(status: 'STARTED' | 'PAUSED' | 'FINISHED') {
   loading.value = false
 }
 
+async function markFinished() {
+  if (!book.value) return
+  markingFinished.value = true
+  await completionsStore.markFinished(book.value.id)
+  markingFinished.value = false
+}
+
 async function deleteBook() {
   if (!book.value || !confirm(t('bookDetail.confirmDelete'))) return
   await booksStore.deleteBook(book.value.id)
@@ -78,6 +113,12 @@ async function deleteBook() {
 function formatDate(iso: string) {
   return new Date(iso).toLocaleString(locale.value === 'cs' ? 'cs-CZ' : 'en-US', {
     day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit',
+  })
+}
+
+function formatDateShort(iso: string) {
+  return new Date(iso).toLocaleDateString(locale.value === 'cs' ? 'cs-CZ' : 'en-US', {
+    day: 'numeric', month: 'long', year: 'numeric',
   })
 }
 </script>
@@ -98,12 +139,17 @@ function formatDate(iso: string) {
         <div class="text-white pb-2">
           <h1 class="text-xl font-bold leading-tight line-clamp-2">{{ book.title }}</h1>
           <p v-if="book.author" class="text-white/80 text-sm">{{ book.author }}</p>
-          <p v-if="book.year" class="text-white/60 text-xs">{{ book.year }}</p>
+          <p class="text-white/60 text-xs">
+            <span v-if="book.year">{{ book.year }}</span>
+            <span v-if="book.year && book.total_pages"> · </span>
+            <span v-if="book.total_pages">{{ t('bookDetail.pages', { n: book.total_pages }) }}</span>
+          </p>
         </div>
       </div>
     </div>
 
     <div class="px-4 mt-12 space-y-4">
+      <!-- My info card -->
       <div class="card">
         <div class="flex items-center justify-between mb-3">
           <h2 class="font-semibold text-gray-700">{{ t('bookDetail.myInfo') }}</h2>
@@ -123,13 +169,77 @@ function formatDate(iso: string) {
             <p v-else class="mt-1 text-gray-700">{{ book.location || '—' }}</p>
           </div>
           <div>
+            <label class="text-xs text-gray-400 uppercase tracking-wide">{{ t('bookDetail.totalPages') }}</label>
+            <input v-if="editing" v-model.number="editTotalPages" type="number" min="1" class="input mt-1" :placeholder="t('bookDetail.totalPagesPlaceholder')" />
+            <p v-else class="mt-1 text-gray-700">{{ book.total_pages ?? '—' }}</p>
+          </div>
+          <div>
             <label class="text-xs text-gray-400 uppercase tracking-wide">{{ t('bookDetail.notes') }}</label>
             <textarea v-if="editing" v-model="editNotes" class="input mt-1 h-20 resize-none" :placeholder="t('bookDetail.notesPlaceholder')" />
             <p v-else class="mt-1 text-gray-700 whitespace-pre-wrap">{{ book.notes || '—' }}</p>
           </div>
+          <!-- Tags -->
+          <div>
+            <label class="text-xs text-gray-400 uppercase tracking-wide">{{ t('bookDetail.tags') }}</label>
+            <div class="mt-2 flex flex-wrap gap-2">
+              <template v-if="editing">
+                <button
+                  v-for="tag in tagsStore.tags"
+                  :key="tag.id"
+                  type="button"
+                  @click="toggleTag(tag.id)"
+                  :class="['px-3 py-1 rounded-full text-sm transition-colors',
+                    bookTagIds.includes(tag.id)
+                      ? 'bg-brand-700 text-white'
+                      : 'bg-gray-100 text-gray-500 hover:bg-gray-200']"
+                >
+                  {{ tag.name }}
+                </button>
+              </template>
+              <template v-else>
+                <span
+                  v-for="tagId in bookTagIds"
+                  :key="tagId"
+                  class="px-3 py-1 rounded-full text-sm bg-brand-100 text-brand-800"
+                >
+                  {{ tagsStore.getTagById(tagId)?.name }}
+                </span>
+                <span v-if="bookTagIds.length === 0" class="text-gray-400 text-sm">—</span>
+              </template>
+            </div>
+          </div>
         </div>
       </div>
 
+      <!-- Mark as finished -->
+      <div class="card">
+        <div class="flex items-center justify-between mb-3">
+          <div>
+            <h2 class="font-semibold text-gray-700">{{ t('bookDetail.finishHistory') }}</h2>
+            <p class="text-xs text-gray-400 mt-0.5">{{ t('bookDetail.markFinishedHint') }}</p>
+          </div>
+          <button
+            @click="markFinished"
+            :disabled="markingFinished"
+            class="btn-primary text-sm flex items-center gap-1.5 disabled:opacity-50"
+          >
+            <BookOpenIcon class="w-4 h-4" />
+            {{ t('bookDetail.markFinished') }}
+          </button>
+        </div>
+        <div v-if="bookCompletions.length" class="mt-2 space-y-1.5">
+          <div
+            v-for="(c, i) in bookCompletions"
+            :key="c.id"
+            class="flex items-center gap-2 text-sm text-gray-600"
+          >
+            <span class="text-brand-600 font-medium min-w-[1.25rem] text-center">{{ bookCompletions.length - i }}.</span>
+            <span>{{ formatDateShort(c.finished_at) }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Log reading session -->
       <div class="card">
         <h2 class="font-semibold text-gray-700 mb-3">{{ t('bookDetail.logReading') }}</h2>
         <div class="flex gap-2 mb-3">
@@ -148,6 +258,7 @@ function formatDate(iso: string) {
         </div>
       </div>
 
+      <!-- Reading history -->
       <div v-if="sessions.length" class="card">
         <h2 class="font-semibold text-gray-700 mb-3">{{ t('bookDetail.readingHistory') }}</h2>
         <div class="space-y-3">
